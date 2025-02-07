@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -33,6 +34,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         gridLayer = data.gridLayer;
         _spriteRenderer.sprite = data.sprite;
         _spriteRenderer.color = _theme.defaultColor;
+        _spriteRenderer.sortingOrder = data.defaultSortingOrder;
         
         _collider = gameObject.AddComponent<BoxCollider2D>();
         _collider.edgeRadius = 0.1f;
@@ -248,6 +250,10 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         // the required edges can be filled. If any cell fails, cancel the drop.
         foreach (var cell in cellTargets)
         {
+            if (cell.completed)
+            {
+                continue;
+            }
             if (!cell.FillEdges(snapTargets, edgeTargets,_theme.defaultColor))
             {
                 BackToStart();
@@ -266,12 +272,14 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         var targetY = (yPositions.Min() + yPositions.Max()) / 2;
 
         transform.position = new Vector3(targetX, targetY, transform.position.z);
+        
+        transform.parent = GridManager.Instance.GetCell(new Vector2(targetX, targetY)).transform;
 
         // Disable interaction and update visuals.
         _collider.enabled = false;
         foreach (var sensor in dotSensors)
         {
-            sensor.Disable();
+            sensor.SetColliderState(false);
         }
         BringToBack();
         ghostTransform.gameObject.SetActive(false);
@@ -285,6 +293,27 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
 
     private void BringToBack()
     {
-        _spriteRenderer.sortingOrder = 3;
+        _spriteRenderer.sortingOrder = data.ghostSortingOrder;
     }
+
+    private void OnDisable()
+    {
+        print($"Reset {gameObject.name}");
+        Invoke(nameof(ResetState),1);
+    }
+    
+    private void ResetState(){
+        
+        transform.parent = null;
+        _collider.enabled = true;
+        foreach (var sensor in dotSensors)
+        {
+            sensor.SetColliderState(true);
+        }
+        _spriteRenderer.sortingOrder = data.defaultSortingOrder;
+        ghostTransform.gameObject.SetActive(false);
+        //transform.position = _startPosition;
+        
+    }
+    
 }

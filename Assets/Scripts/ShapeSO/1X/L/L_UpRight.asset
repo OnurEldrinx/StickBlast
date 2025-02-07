@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 152961acb4f960d4caf9a1af9c1912e1, type: 3}
-  m_Name: I_H
+  m_Name: L_UpRight
   m_EditorClassIdentifier: 
   theme: {fileID: 11400000, guid: 307ebfd559feb634aa087b4acff31ed6, type: 2}
-  sprite: {fileID: 21300000, guid: fa2e7e8a411e9a04bae0f2af379d7061, type: 3}
+  sprite: {fileID: 21300000, guid: 85ae4a398e2e8404b817be908f90836b, type: 3}
   gridLayer:
     serializedVersion: 2
     m_Bits: 64
   dragOffset: 1
+  defaultSortingOrder: 10
+  ghostSortingOrder: 3

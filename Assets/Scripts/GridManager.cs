@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GridManager : Singleton<GridManager>
@@ -8,8 +10,10 @@ public class GridManager : Singleton<GridManager>
     [SerializeField] private List<Dot> dots;
     [SerializeField] private List<Cell> cells;
     private Dot[,] _dotMatrix;
+    private Cell[,] _cellMatrix;
     
-    
+    private List<Cell> blastRow;
+    private List<Cell> blastColumn;
     
     private void Awake()
     {
@@ -44,6 +48,22 @@ public class GridManager : Singleton<GridManager>
             c.dots = NearestFourDots(c.transform.position);
         }
         
+        //Generate Cell Matrix
+        int k = (int)Mathf.Sqrt(cells.Count);
+        _cellMatrix = new Cell[k, k];
+        int cellIndex=0;
+        for (int i = 0; i < k; i++)
+        {
+            for (int j = 0; j < k; j++)
+            {
+                var currentCell = cells[cellIndex++];
+                currentCell.id = cellIndex;
+                _cellMatrix[i, j] = currentCell;
+                _cellMatrix[i,j].SetCoordinates(new Vector2Int(i,j));
+            }
+        }
+        
+        
     }
     
     private int CompareByNames(Dot d1, Dot d2)
@@ -64,6 +84,36 @@ public class GridManager : Singleton<GridManager>
             .OrderBy(d => Vector2.Distance(d.transform.position, position))
             .Take(4)
             .ToList();
+    }
+    
+    private List<Cell> NeighborsOf(Cell cell)
+    {
+        int x = cell.GetCoordinates().x;
+        int y = cell.GetCoordinates().y;
+
+        var result = new List<Cell>();
+
+        if (x - 1 >= 0)
+        {
+            result.Add(_cellMatrix[x - 1, y]);
+        }
+
+        if (x + 1 < _cellMatrix.GetLength(0))
+        {
+            result.Add(_cellMatrix[x + 1, y]);
+        }
+
+        if (y - 1 >= 0)
+        {
+            result.Add(_cellMatrix[x, y - 1]);
+        }
+
+        if (y + 1 < _cellMatrix.GetLength(1))
+        {
+            result.Add(_cellMatrix[x, y + 1]);
+        }
+        
+        return result;
     }
     
     private List<Dot> NeighborsOf(Dot dot)
@@ -101,5 +151,106 @@ public class GridManager : Singleton<GridManager>
         return dot.Edges.FirstOrDefault(e => e.tag == t);
     }
 
+    public Cell GetCell(Vector2 position)
+    {
+        return cells.Find(e => Mathf.Approximately(e.transform.position.x, position.x) && Mathf.Approximately(e.transform.position.y, position.y));
+    }
+    
+    public bool IsRowComplete(Cell queryCell)
+    {
+        var row = cells.FindAll(c=>c.GetCoordinates().x == queryCell.GetCoordinates().x);
+
+        foreach (var c in row)
+        {
+            if (!c.completed)
+            {
+                return false;
+            }
+        }
+        
+        blastRow = row;
+        print($"Row complete {queryCell.gameObject.name}");
+        return true;
+        
+    }
+
+    public bool IsColumnComplete(Cell queryCell)
+    {
+        var column = cells.FindAll(c=>c.GetCoordinates().y == queryCell.GetCoordinates().y);
+
+        foreach (var c in column)
+        {
+            if (!c.completed)
+            {
+                return false;
+            }
+        }
+        
+        blastColumn = column;
+        print($"Column complete {queryCell.gameObject.name}");
+        return true;
+        
+    }
+
+    public async void IsTimeToBlast(Cell queryCell)
+    {
+        
+        try
+        {
+            await Task.Delay(250);
+        
+            HashSet<Cell> neighborsToReset = new HashSet<Cell>();
+            
+            if (IsRowComplete(queryCell))
+            {
+                print($"Blasting Row-{queryCell.GetCoordinates().x}!");
+
+                foreach (var c in blastRow)
+                {
+                    await Task.Delay(50);
+                    for (int i = 0; i < c.transform.childCount; i++)
+                    {
+                        var child = c.transform.GetChild(i);
+                        child.gameObject.SetActive(false);
+                    }
+                    
+                    c.ResetState();
+                    neighborsToReset.UnionWith(NeighborsOf(c));
+                    
+                }
+                
+            }
+
+            if (IsColumnComplete(queryCell))
+            {
+                print($"Blasting Column-{queryCell.GetCoordinates().y}!");
+            
+                foreach (var c in blastColumn)
+                {
+                    await Task.Delay(50);
+                    for (int i = 0; i < c.transform.childCount; i++)
+                    {
+                        var child = c.transform.GetChild(i);
+                        child.gameObject.SetActive(false);
+                    }
+                    
+                    c.ResetState();
+                    neighborsToReset.UnionWith(NeighborsOf(c));
+                    
+                }
+            }
+
+            foreach (var c in neighborsToReset)
+            {
+                c.ResetState();
+            }
+            
+        }
+        catch (Exception e)
+        {
+            print(e.Message);
+        }
+    }
+    
     
 }

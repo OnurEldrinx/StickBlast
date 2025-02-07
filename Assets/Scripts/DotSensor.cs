@@ -31,9 +31,11 @@ public class DotSensor : MonoBehaviour
         
     }
 
-    public void Disable()
+    public void SetColliderState(bool state)
     {
-        _collider.enabled = false;
+        _collider.enabled = state;
     }
+    
+    
     
 }

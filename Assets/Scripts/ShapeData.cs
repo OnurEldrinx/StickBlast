@@ -7,5 +7,7 @@ public class ShapeData : ScriptableObject
     public Sprite sprite;
     public LayerMask gridLayer;
     public float dragOffset;
+    public int defaultSortingOrder = 10;
+    public int ghostSortingOrder = 3;
 
 }

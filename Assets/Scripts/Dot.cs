@@ -14,6 +14,7 @@ public class Dot : MonoBehaviour
 
     private SpriteRenderer _spriteRenderer;
     private Color _defaultColor;
+    private Color _initialColor;
 
     private int _defaultSortingOrder;
     private int _currentSortingOrder;
@@ -26,6 +27,7 @@ public class Dot : MonoBehaviour
         Edges = new List<Edge>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _defaultColor = _spriteRenderer.color;
+        _initialColor = _spriteRenderer.color;
         _defaultSortingOrder = _spriteRenderer.sortingOrder;
         _currentSortingOrder = _defaultSortingOrder;
     }
@@ -74,22 +76,18 @@ public class Dot : MonoBehaviour
 
     }
 
-    public void BringToFront()
-    {
-        _spriteRenderer.sortingOrder = 5;
-    }
-
-    public void BringToBack()
-    {
-        _spriteRenderer.sortingOrder = 2;
-    }
-
     public void FillAnimation(Color c)
     {
         transform.DOShakeScale( 0.5f,0.5f,10,0,true,ShakeRandomnessMode.Harmonic).SetEase(Ease.OutBounce);
         _spriteRenderer.DOColor(c,0.5f);
         _defaultColor = c;
 
+    }
+
+    public void ResetState()
+    {
+        _spriteRenderer.color = _initialColor;
+        _defaultColor = _initialColor;
     }
     
 }

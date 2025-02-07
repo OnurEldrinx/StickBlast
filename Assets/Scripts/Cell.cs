@@ -9,6 +9,10 @@ public class Cell : MonoBehaviour
     public bool completed;
     
     [SerializeField] private int edgesCount;
+
+    public int id;
+    [SerializeField] private Vector2Int coordinates;
+
     
     private void Start()
     {
@@ -85,6 +89,7 @@ public class Cell : MonoBehaviour
         {
             completed = true;
             SpawnManager.Instance.FillTheCell(transform,fillColor);
+            GridManager.Instance.IsTimeToBlast(this);
         }
         
         return true;
@@ -94,6 +99,32 @@ public class Cell : MonoBehaviour
     {
         var s = t.Split(',');
         return s[1]+","+s[0];
+        
+    }
+    
+    public void SetCoordinates(Vector2Int c)
+    {
+        coordinates = c;
+    }
+
+    public Vector2Int GetCoordinates()
+    {
+        return coordinates;
+    }
+    
+    public void ResetState(){
+        completed = false;
+        edgesCount = edges.Count;
+
+        foreach (var edge in edges)
+        {
+            edge.filled = false;
+        }
+        
+        foreach (var d in dots)
+        {
+            d.ResetState();
+        }
         
     }
     

@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 152961acb4f960d4caf9a1af9c1912e1, type: 3}
-  m_Name: U_Down
+  m_Name: U_Up2
   m_EditorClassIdentifier: 
   theme: {fileID: 11400000, guid: 307ebfd559feb634aa087b4acff31ed6, type: 2}
-  sprite: {fileID: 21300000, guid: d52deade2813cd4468afb3ca401ba546, type: 3}
+  sprite: {fileID: 21300000, guid: 7f26e7d5d46000c47afc56cec6c98920, type: 3}
   gridLayer:
     serializedVersion: 2
     m_Bits: 64
   dragOffset: 1
+  defaultSortingOrder: 10
+  ghostSortingOrder: 3
