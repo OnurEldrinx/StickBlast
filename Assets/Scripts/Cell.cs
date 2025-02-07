@@ -53,7 +53,7 @@ public class Cell : MonoBehaviour
     }
 
 
-    public bool FillEdges(List<Dot> targetDots,HashSet<string> targetEdges)
+    public bool FillEdges(List<Dot> targetDots,HashSet<string> targetEdges,Color fillColor)
     {
         
         HashSet<Dot> dotSet = new HashSet<Dot>(targetDots);
@@ -84,6 +84,7 @@ public class Cell : MonoBehaviour
         if (edgesCount == 0)
         {
             completed = true;
+            SpawnManager.Instance.FillTheCell(transform,fillColor);
         }
         
         return true;

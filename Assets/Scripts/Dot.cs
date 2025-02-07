@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class Dot : MonoBehaviour
@@ -16,6 +17,8 @@ public class Dot : MonoBehaviour
 
     private int _defaultSortingOrder;
     private int _currentSortingOrder;
+    
+    private Tweener _highlightFadeTween;
 
     private void Awake()
     {
@@ -58,14 +61,17 @@ public class Dot : MonoBehaviour
         return coordinates;
     }
 
-    public void Highlight()
+    public void Highlight(Color c)
     {
-        _spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+        _highlightFadeTween.Kill();
+        _spriteRenderer.color = c;
     }
 
     public void Unhighlight()
     {
-        _spriteRenderer.color = _defaultColor;
+        //_spriteRenderer.color = _defaultColor;
+        _highlightFadeTween = _spriteRenderer.DOColor(_defaultColor,0.25f);
+
     }
 
     public void BringToFront()
@@ -76,6 +82,14 @@ public class Dot : MonoBehaviour
     public void BringToBack()
     {
         _spriteRenderer.sortingOrder = 2;
-    } 
+    }
+
+    public void FillAnimation(Color c)
+    {
+        transform.DOShakeScale( 0.5f,0.5f,10,0,true,ShakeRandomnessMode.Harmonic).SetEase(Ease.OutBounce);
+        _spriteRenderer.DOColor(c,0.5f);
+        _defaultColor = c;
+
+    }
     
 }

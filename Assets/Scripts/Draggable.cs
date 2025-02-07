@@ -11,20 +11,32 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     [SerializeField] private LayerMask gridLayer;
     [SerializeField] private DotSensor[] dotSensors;
     [SerializeField] private List<ShapeEdge> edges;
-    [SerializeField] private Transform ghost;
+    [SerializeField] private Transform ghostTransform;
+    [SerializeField] private ShapeData data;
     
     // This field is no longer needed globally; see the refactored check below.
     // private bool _candidatePlaceExist;
 
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
+    private ThemeData _theme;
 
+    
     private void Awake()
     {
         _mainCamera = Camera.main;
-        _collider = GetComponent<BoxCollider2D>();
         dotSensors = GetComponentsInChildren<DotSensor>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        _theme = data.theme;
+        dragOffset = data.dragOffset;
+        gridLayer = data.gridLayer;
+        _spriteRenderer.sprite = data.sprite;
+        _spriteRenderer.color = _theme.defaultColor;
+        
+        _collider = gameObject.AddComponent<BoxCollider2D>();
+        _collider.edgeRadius = 0.1f;
+        
     }
 
     private void Start()
@@ -35,8 +47,31 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             var edge = new ShapeEdge(dotSensors[i], dotSensors[i + 1]);
             edges.Add(edge);
         }
+        
+        CreateGhost();
+        
     }
 
+    private void CreateGhost()
+    {
+        GameObject ghost = new GameObject
+        {
+            name = "Ghost",
+            transform =
+            {
+                parent = transform,
+                localPosition = Vector3.zero
+            }
+        };
+        var ghostRenderer = ghost.AddComponent<SpriteRenderer>();
+        ghostRenderer.sprite = data.sprite;
+        ghostRenderer.color = new Color(1f, 1f, 1f, 0.3f);
+        ghostRenderer.sortingOrder = 3;
+        
+        ghostTransform = ghost.transform;
+        ghost.SetActive(false);
+    }
+    
     public void OnPointerDown(PointerEventData eventData)
     {
         _startPosition = transform.position;
@@ -122,10 +157,10 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             // Assuming GridManager.GetEdge takes two dots (or one dot and the other’s id)
             // Adjust the call as needed. Here we assume it takes two Dot objects.
             var edge = GridManager.Instance.GetEdge(current, current.id+","+next.id);
+            var edgeAlternative = GridManager.Instance.GetEdge(current, next.id+","+current.id);
 
             // If the edge exists and is filled, placement is not allowed.
-            if (edge is { filled: true })
-                return false;
+            if (edge is { filled: true } || edgeAlternative is {filled:true}) return false;
         }
 
         return true;
@@ -138,7 +173,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     {
         foreach (var sensor in dotSensors)
         {
-            sensor.snapTarget?.Highlight();
+            sensor.snapTarget?.Highlight(_theme.highlightColor);
         }
         
         // Calculate the new center position based on the min and max snap positions.
@@ -157,8 +192,8 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         var targetX = (xPositions.Min() + xPositions.Max()) / 2;
         var targetY = (yPositions.Min() + yPositions.Max()) / 2;
     
-        ghost.position = new Vector3(targetX, targetY, ghost.position.z);
-        ghost.gameObject.SetActive(true);
+        ghostTransform.position = new Vector3(targetX, targetY, ghostTransform.position.z);
+        ghostTransform.gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -166,12 +201,12 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     /// </summary>
     private void UnhighlightSensors()
     {
-        foreach (var sensor in dotSensors)
+        /*foreach (var sensor in dotSensors)
         {
             sensor.snapTarget?.Unhighlight(); // Assumes an Unhighlight method exists.
-        }
-        ghost.gameObject.SetActive(false);
-        ghost.localPosition = Vector3.zero;
+        }*/
+        ghostTransform.gameObject.SetActive(false);
+        ghostTransform.localPosition = Vector3.zero;
     }
 
     private void Drop()
@@ -213,12 +248,18 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         // the required edges can be filled. If any cell fails, cancel the drop.
         foreach (var cell in cellTargets)
         {
-            if (!cell.FillEdges(snapTargets, edgeTargets))
+            if (!cell.FillEdges(snapTargets, edgeTargets,_theme.defaultColor))
             {
                 BackToStart();
                 return;
             }
         }
+
+        foreach (var dot in snapTargets)
+        {
+            dot.FillAnimation(_theme.defaultColor);
+        }
+        
 
         // Calculate the new center position based on the min and max snap positions.
         var targetX = (xPositions.Min() + xPositions.Max()) / 2;
@@ -233,7 +274,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             sensor.Disable();
         }
         BringToBack();
-        ghost.gameObject.SetActive(false);
+        ghostTransform.gameObject.SetActive(false);
     }
 
     private void BackToStart()
