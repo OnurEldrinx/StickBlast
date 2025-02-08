@@ -50,6 +50,7 @@ public class DotSensor : MonoBehaviour
     {
         snapTarget = target;
         SnapTargetAvailable = target != null;
+        _snapPosition = target != null ? target.transform.position : Vector3.zero;
     }
 
     /// <summary>

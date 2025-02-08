@@ -211,6 +211,9 @@ public class GridManager : Singleton<GridManager>
 
                 foreach (var c in blastRow)
                 {
+                    var pos = c.transform.position;
+                    pos.z = 20;
+                    SpawnManager.Instance.SpawnBlastEffect(pos);
                     await Task.Delay(50);
                     c.fill.SetActive(false);
 
@@ -235,6 +238,9 @@ public class GridManager : Singleton<GridManager>
             
                 foreach (var c in blastColumn)
                 {
+                    var pos = c.transform.position;
+                    pos.z = 20;
+                    SpawnManager.Instance.SpawnBlastEffect(pos);
                     await Task.Delay(50);
                     
                     c.fill.SetActive(false);

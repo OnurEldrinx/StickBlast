@@ -60,6 +60,9 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         {
             sensor.Initialize(_theme.dotColor);
         }
+        
+        _startPosition = transform.position;
+
     }
 
     private void CreateGhost()
@@ -83,15 +86,26 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         ghost.SetActive(false);
     }
 
+    private Tweener _offsetTween;
+    private Tweener _scaleTween;
+    
     public void OnPointerDown(PointerEventData eventData)
     {
-        _startPosition = transform.position;
 
+        if (eventData.clickCount == 1)
+        {
+            print("Clicked");
+        }
+        
         // Calculate the initial offset so the object does not “jump.”
         var pointerPosition = _mainCamera.ScreenToWorldPoint(eventData.position);
         pointerPosition.z = transform.position.z;
-        transform.position = pointerPosition + (Vector3.up * dragOffset);
-        transform.DOScale(Vector3.one, 0.25f).SetEase(Ease.OutBounce);
+        //transform.position = pointerPosition + (Vector3.up * dragOffset);
+        _offsetTween = transform.DOMove(pointerPosition + (Vector3.up * dragOffset),0.1f);
+        
+
+        //transform.localScale = Vector3.one;
+        _scaleTween = transform.DOScale(Vector3.one, 0.25f).SetEase(Ease.InOutBack);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -124,6 +138,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        _offsetTween.Kill();
         // Check again for a valid grid cell under the piece.
         var hit = Physics2D.Raycast(transform.position, transform.forward, 10, gridLayer);
         bool canDrop = hit.collider != null;
@@ -211,6 +226,12 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     /// </summary>
     private void Drop()
     {
+        if (!ghostTransform.gameObject.activeInHierarchy)
+        {
+            BackToStart();
+            return;
+        }
+        
         List<float> xPositions = new List<float>();
         List<float> yPositions = new List<float>();
         var snapTargets = new List<Dot>();
@@ -293,9 +314,15 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
 
     private void BackToStart()
     {
+        _offsetTween?.Kill();
+        _scaleTween?.Kill();
         transform.position = _startPosition;
         transform.localScale = data.spawnScale * Vector3.one;
         UnhighlightSensors();
+        foreach (var sensor in dotSensors)
+        {
+            sensor.ResetSensor();
+        }
     }
 
     private void BringToBack()

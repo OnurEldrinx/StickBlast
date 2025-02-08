@@ -8,6 +8,7 @@ public class SpawnManager : Singleton<SpawnManager>
     [SerializeField] private SpriteRenderer fillSprite;
     [SerializeField] private List<Transform> spawnPoints;
     [SerializeField] private List<Draggable> draggablePrefabs;
+    [SerializeField] private ParticleSystem blastEffect;
 
     // Tracks the number of draggables currently in the tray.
     public int draggableCount;
@@ -94,4 +95,11 @@ public class SpawnManager : Singleton<SpawnManager>
             SpawnDraggables();
         }
     }
+
+    public void SpawnBlastEffect(Vector3 position)
+    {
+        var b = Instantiate(blastEffect, position, Quaternion.identity);
+        b.Play();
+    }
+    
 }
