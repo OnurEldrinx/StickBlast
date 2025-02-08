@@ -12,11 +12,9 @@ public class GridManager : Singleton<GridManager>
     private Dot[,] _dotMatrix;
     private Cell[,] _cellMatrix;
     
-    private List<Cell> blastRow;
-    private List<Cell> blastColumn;
+    public List<Cell> blastRow;
+    public List<Cell> blastColumn;
 
-    public List<Edge> allEdges;
-    [SerializeField] public List<Edge> filledEdges;
     
     public ThemeData themeData;
     
@@ -69,21 +67,7 @@ public class GridManager : Singleton<GridManager>
         }
         
     }
-
-    private void Start()
-    {
-        allEdges = cells.SelectMany(cell => cell.edges).ToList();
-
-        /*foreach (var edge in allEdges)
-        {
-            foreach (var c in cells.Where(c => c.edges.Contains(edge)))
-            {
-                edge.cell = c;
-                break;
-            }
-        }*/
-        
-    }
+    
 
     private int CompareByNames(Dot d1, Dot d2)
     {
@@ -216,10 +200,9 @@ public class GridManager : Singleton<GridManager>
         
         try
         {
-            await Task.Delay(250);
+            //await Task.Delay(250);
         
             HashSet<Cell> neighbors = new HashSet<Cell>();
-            var blastedEdges = new List<Edge>();
             
             
             if (IsRowComplete(queryCell))
@@ -229,7 +212,7 @@ public class GridManager : Singleton<GridManager>
                 foreach (var c in blastRow)
                 {
                     await Task.Delay(50);
-                    c.transform.GetChild(0).gameObject.SetActive(false);
+                    c.fill.SetActive(false);
 
                     foreach (var e in c.edges)
                     {
@@ -240,9 +223,12 @@ public class GridManager : Singleton<GridManager>
                     neighbors.UnionWith(NeighborsOf(c));
                     
                 }
-                
-            }
 
+                await Task.Delay(100);
+
+            }
+            
+            
             if (IsColumnComplete(queryCell))
             {
                 //print($"Blasting Column-{queryCell.GetCoordinates().y}!");
@@ -251,7 +237,7 @@ public class GridManager : Singleton<GridManager>
                 {
                     await Task.Delay(50);
                     
-                    c.transform.GetChild(0).gameObject.SetActive(false);
+                    c.fill.SetActive(false);
                     
                     foreach (var e in c.edges)
                     {
@@ -264,7 +250,7 @@ public class GridManager : Singleton<GridManager>
                 }
             }
 
-
+            //await Task.Delay(75);
             foreach (var n in neighbors)
             {
                 n.UpdateState();
@@ -278,5 +264,10 @@ public class GridManager : Singleton<GridManager>
         }
     }
     
+    public List<Cell> FindCellByEdge(string t){
+        
+        return cells.FindAll(c=>c.edges.Any(e => e.tag == t));
+        
+    }
     
 }

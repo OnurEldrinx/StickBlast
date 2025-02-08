@@ -36,6 +36,10 @@ public class SpawnManager : Singleton<SpawnManager>
         f.color = c;
         f.transform.localPosition = Vector3.zero;
         f.transform.DOScale(Vector3.one * 1.175f, 0.5f);
+
+
+        cell.GetComponent<Cell>().fill = f.gameObject;
+
     }
 
     /// <summary>

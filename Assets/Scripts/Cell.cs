@@ -12,6 +12,9 @@ public class Cell : MonoBehaviour
 
     public int id;
     [SerializeField] private Vector2Int coordinates;
+
+    public GameObject fill;
+    
     
     private void Start()
     {
@@ -107,7 +110,6 @@ public class Cell : MonoBehaviour
         {
             edge.filled = true;
             edgesCount--;
-            GridManager.Instance.filledEdges.Add(edge);
 
             // Look for the corresponding shape edge by matching tags.
             var foundStick = sticks.Find(s => s.currentEdgeTag == edge.tag || s.currentEdgeTag == ReverseTag(edge.tag));
@@ -174,7 +176,7 @@ public class Cell : MonoBehaviour
         {
             if (transform.childCount > 0)
             {
-                transform.GetChild(0).gameObject.SetActive(false);
+                fill.SetActive(false);
             }
         }
 
@@ -188,6 +190,12 @@ public class Cell : MonoBehaviour
             d.ResetState();
         }
         
+    }
+
+    public void Clear()
+    {
+        completed = false;
+        edgesCount = edges.Count;
     }
 
 }

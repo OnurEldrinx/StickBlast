@@ -79,7 +79,8 @@ public class Dot : MonoBehaviour
 
     public void ResetState()
     {
-        _spriteRenderer.color = _initialColor;
+        //_spriteRenderer.color = _initialColor;
+        _spriteRenderer.DOColor(_initialColor, 0.25f);
         _defaultColor = _initialColor;
     }
 

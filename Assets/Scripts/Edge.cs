@@ -76,17 +76,17 @@ public class Edge
 
     public void OnBlast(Cell other)
     {
-
+        
         var neighborsCell = GridManager.Instance.NeighborsOf(other);
 
         foreach (var neighbor in neighborsCell)
         {
-            if (neighbor.edges.Contains(this) && neighbor.completed)
+            if (neighbor.edges.Exists(x=>x.tag == tag) && neighbor.completed && !neighbor.edges.Contains(this))
             {
-                continue;
+                return;
             }
 
-            var e = neighbor.edges.FirstOrDefault(e => e.tag == this.tag);
+            var e = neighbor.edges.FirstOrDefault(e => e.tag == tag);
             if (e != null)
             {
                 e.filled = false;
@@ -94,7 +94,7 @@ public class Edge
                 e.stickSprite = null;
             }
         }
-
+        
         filled = false;
         stickSprite?.SetActive(false);
         stickSprite = null;
