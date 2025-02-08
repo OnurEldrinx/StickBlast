@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -13,32 +13,36 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     [SerializeField] private DotSensor[] dotSensors;
     [SerializeField] private List<ShapeEdge> edges;
     [SerializeField] private Transform ghostTransform;
-    [SerializeField] private ShapeData data;
-    
-    // This field is no longer needed globally; see the refactored check below.
-    // private bool _candidatePlaceExist;
+    [SerializeField] public ShapeData data;
 
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
     private ThemeData _theme;
 
-    
+    [SerializeField] private List<ShapeEdge> shapeEdges = new List<ShapeEdge>();
+
     private void Awake()
     {
         _mainCamera = Camera.main;
         dotSensors = GetComponentsInChildren<DotSensor>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
-        
+
         _theme = data.theme;
         dragOffset = data.dragOffset;
         gridLayer = data.gridLayer;
         _spriteRenderer.sprite = data.sprite;
-        _spriteRenderer.color = _theme.defaultColor;
-        _spriteRenderer.sortingOrder = data.defaultSortingOrder;
-        
+        _spriteRenderer.enabled = false;
+        // _spriteRenderer.color = _theme.defaultColor;
+        // _spriteRenderer.sortingOrder = data.defaultSortingOrder;
+
+        foreach (var shapeEdge in shapeEdges)
+        {
+            shapeEdge.sprite.sortingOrder = data.defaultSortingOrder;
+            shapeEdge.sprite.color = _theme.defaultColor;
+        }
+
         _collider = gameObject.AddComponent<BoxCollider2D>();
         _collider.edgeRadius = 0.1f;
-        
     }
 
     private void Start()
@@ -49,9 +53,13 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             var edge = new ShapeEdge(dotSensors[i], dotSensors[i + 1]);
             edges.Add(edge);
         }
-        
+
         CreateGhost();
-        
+
+        foreach (var sensor in dotSensors)
+        {
+            sensor.Initialize(_theme.dotColor);
+        }
     }
 
     private void CreateGhost()
@@ -69,11 +77,12 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         ghostRenderer.sprite = data.sprite;
         ghostRenderer.color = new Color(1f, 1f, 1f, 0.3f);
         ghostRenderer.sortingOrder = 3;
-        
+
         ghostTransform = ghost.transform;
+        ghostTransform.localScale = Vector3.one;
         ghost.SetActive(false);
     }
-    
+
     public void OnPointerDown(PointerEventData eventData)
     {
         _startPosition = transform.position;
@@ -82,6 +91,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         var pointerPosition = _mainCamera.ScreenToWorldPoint(eventData.position);
         pointerPosition.z = transform.position.z;
         transform.position = pointerPosition + (Vector3.up * dragOffset);
+        transform.DOScale(Vector3.one, 0.25f).SetEase(Ease.OutBounce);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -92,10 +102,11 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         transform.position = pointerPosition + (Vector3.up * dragOffset);
 
         // Check if the object is over a valid grid cell.
+        // (Using transform.forward is acceptable if your grid is on the appropriate plane.)
         var hit = Physics2D.Raycast(transform.position, transform.forward, 10, gridLayer);
         bool canDrop = hit.collider != null;
 
-        // If the object isn’t over a grid cell, you may choose to disable candidate highlighting.
+        // If not over a grid cell, remove any candidate highlighting.
         if (!canDrop)
         {
             UnhighlightSensors();
@@ -105,36 +116,26 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         // Now check if the candidate placement is valid.
         bool candidatePlaceAvailable = IsCandidatePlaceAvailable();
 
-        // If so, highlight the snap targets.
         if (candidatePlaceAvailable)
-        {
             HighlightSensors();
-        }
         else
-        {
             UnhighlightSensors();
-        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        // If over a valid grid cell and all sensors are properly snapped, drop the shape.
-        // Otherwise, return to the original position.
+        // Check again for a valid grid cell under the piece.
         var hit = Physics2D.Raycast(transform.position, transform.forward, 10, gridLayer);
         bool canDrop = hit.collider != null;
 
         if (canDrop)
-        {
             Drop();
-        }
         else
-        {
             BackToStart();
-        }
     }
 
     /// <summary>
-    /// Checks whether all dot sensors have a valid snap target and whether all consecutive edges are available.
+    /// Verifies that every DotSensor has a valid snap target and that none of the consecutive edges are already filled.
     /// </summary>
     /// <returns>true if placement is valid; otherwise, false.</returns>
     private bool IsCandidatePlaceAvailable()
@@ -145,31 +146,29 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         foreach (var sensor in dotSensors)
         {
             if (sensor.snapTarget == null)
-                return false; // If any sensor does not have a target, placement is invalid.
-
+                return false; // Placement is invalid if any sensor lacks a target.
             snapTargets.Add(sensor.snapTarget);
         }
 
-        // Check each consecutive pair to see if the corresponding grid edge is already filled.
+        // Check each consecutive pair to ensure the corresponding grid edge is available.
         for (int i = 0; i < snapTargets.Count - 1; i++)
         {
             Dot current = snapTargets[i];
             Dot next = snapTargets[i + 1];
 
-            // Assuming GridManager.GetEdge takes two dots (or one dot and the other’s id)
-            // Adjust the call as needed. Here we assume it takes two Dot objects.
-            var edge = GridManager.Instance.GetEdge(current, current.id+","+next.id);
-            var edgeAlternative = GridManager.Instance.GetEdge(current, next.id+","+current.id);
+            // Assume GridManager.GetEdge returns an edge by a key made from dot IDs.
+            var edge = GridManager.Instance.GetEdge(current, current.id + "," + next.id);
+            var edgeAlternative = GridManager.Instance.GetEdge(current, next.id + "," + current.id);
 
-            // If the edge exists and is filled, placement is not allowed.
-            if (edge is { filled: true } || edgeAlternative is {filled:true}) return false;
+            // If either edge is already filled, the candidate placement fails.
+            if ((edge != null && edge.filled) || (edgeAlternative != null && edgeAlternative.filled))
+                return false;
         }
-
         return true;
     }
 
     /// <summary>
-    /// Highlights each snap target by calling its Highlight method.
+    /// Highlights all snap targets and moves the ghost transform to the center of the candidate placement.
     /// </summary>
     private void HighlightSensors()
     {
@@ -177,40 +176,39 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         {
             sensor.snapTarget?.Highlight(_theme.highlightColor);
         }
-        
-        // Calculate the new center position based on the min and max snap positions.
+
+        // Calculate the new center position based on snap target positions.
         List<float> xPositions = new List<float>();
         List<float> yPositions = new List<float>();
-        
+
         foreach (var sensor in dotSensors)
         {
-            // Get the position where the sensor should snap.
             var p = sensor.GetSnapPosition();
             xPositions.Add(p.x);
             yPositions.Add(p.y);
         }
-        
-        
-        var targetX = (xPositions.Min() + xPositions.Max()) / 2;
-        var targetY = (yPositions.Min() + yPositions.Max()) / 2;
-    
+
+        float targetX = (xPositions.Min() + xPositions.Max()) / 2;
+        float targetY = (yPositions.Min() + yPositions.Max()) / 2;
+
         ghostTransform.position = new Vector3(targetX, targetY, ghostTransform.position.z);
         ghostTransform.gameObject.SetActive(true);
     }
 
     /// <summary>
-    /// Optionally, you can add logic here to remove highlighting.
+    /// Disables highlighting.
     /// </summary>
     private void UnhighlightSensors()
     {
-        /*foreach (var sensor in dotSensors)
-        {
-            sensor.snapTarget?.Unhighlight(); // Assumes an Unhighlight method exists.
-        }*/
+        // (If you have an Unhighlight() method on your sensors, call it here.)
         ghostTransform.gameObject.SetActive(false);
         ghostTransform.localPosition = Vector3.zero;
     }
 
+    /// <summary>
+    /// Drops the shape if all sensors are properly snapped. After a successful drop,
+    /// it calls the grid blast method to clear any full row/column.
+    /// </summary>
     private void Drop()
     {
         List<float> xPositions = new List<float>();
@@ -219,61 +217,63 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         var cellTargets = new HashSet<Cell>();
         var edgeTargets = new HashSet<string>();
 
+        // Gather snap positions, dots, and associated grid cells.
         foreach (var sensor in dotSensors)
         {
-            // If any sensor can’t snap, cancel the drop.
             if (!sensor.SnapTargetAvailable)
             {
                 BackToStart();
                 return;
             }
 
-            // Get the position where the sensor should snap.
             var p = sensor.GetSnapPosition();
             xPositions.Add(p.x);
             yPositions.Add(p.y);
 
             Dot currentDot = sensor.snapTarget;
             snapTargets.Add(currentDot);
-
-            // Aggregate cells that are associated with this dot.
             cellTargets.UnionWith(currentDot.Cells);
         }
 
-        // Create a set of edge keys based on consecutive dots.
+        // Create keys for edges between consecutive dots.
         for (int i = 0; i < snapTargets.Count - 1; i++)
         {
             edgeTargets.Add($"{snapTargets[i].id},{snapTargets[i + 1].id}");
         }
 
-        // Fill Logic: For every cell associated with the shape, ensure that all
-        // the required edges can be filled. If any cell fails, cancel the drop.
+        // For every cell associated with this shape, attempt to fill the required edges.
         foreach (var cell in cellTargets)
         {
             if (cell.completed)
-            {
                 continue;
-            }
-            if (!cell.FillEdges(snapTargets, edgeTargets,_theme.defaultColor))
+
+            if (!cell.FillEdges(snapTargets, edgeTargets, _theme.defaultColor, shapeEdges))
             {
                 BackToStart();
                 return;
             }
         }
 
+        // Animate filling for each dot.
         foreach (var dot in snapTargets)
         {
             dot.FillAnimation(_theme.defaultColor);
         }
-        
 
-        // Calculate the new center position based on the min and max snap positions.
-        var targetX = (xPositions.Min() + xPositions.Max()) / 2;
-        var targetY = (yPositions.Min() + yPositions.Max()) / 2;
-
+        // Reposition the shape to the center of its snap targets.
+        float targetX = (xPositions.Min() + xPositions.Max()) / 2;
+        float targetY = (yPositions.Min() + yPositions.Max()) / 2;
         transform.position = new Vector3(targetX, targetY, transform.position.z);
-        
-        transform.parent = GridManager.Instance.GetCell(new Vector2(targetX, targetY)).transform;
+
+        // Update positions of each shape edge sprite.
+        foreach (var shapeEdge in shapeEdges)
+        {
+            var d1 = shapeEdge.d1.GetSnapPosition();
+            var d2 = shapeEdge.d2.GetSnapPosition();
+            float x = (d1.x + d2.x) / 2;
+            float y = (d1.y + d2.y) / 2;
+            shapeEdge.sprite.transform.position = new Vector3(x, y, transform.position.z);
+        }
 
         // Disable interaction and update visuals.
         _collider.enabled = false;
@@ -283,37 +283,50 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         }
         BringToBack();
         ghostTransform.gameObject.SetActive(false);
+
+        // ***** NEW CODE: Check for and blast any fully filled row/column *****
+        
+
+        // Update the tray (or spawn new pieces).
+        SpawnManager.Instance.UpdateTray();
     }
 
     private void BackToStart()
     {
         transform.position = _startPosition;
+        transform.localScale = data.spawnScale * Vector3.one;
         UnhighlightSensors();
     }
 
     private void BringToBack()
     {
-        _spriteRenderer.sortingOrder = data.ghostSortingOrder;
+        // _spriteRenderer.sortingOrder = data.ghostSortingOrder;
+        foreach (var shapeEdge in shapeEdges)
+        {
+            shapeEdge.sprite.sortingOrder = data.ghostSortingOrder;
+        }
     }
 
     private void OnDisable()
     {
-        print($"Reset {gameObject.name}");
-        Invoke(nameof(ResetState),1);
+        // Optionally, delay reset to allow for any animations to finish.
+        Invoke(nameof(ResetState), 1);
     }
-    
-    private void ResetState(){
-        
+
+    private void ResetState()
+    {
         transform.parent = null;
         _collider.enabled = true;
         foreach (var sensor in dotSensors)
         {
             sensor.SetColliderState(true);
+            sensor.EnableSpriteRenderer(false);
         }
-        _spriteRenderer.sortingOrder = data.defaultSortingOrder;
+        // _spriteRenderer.sortingOrder = data.defaultSortingOrder;
         ghostTransform.gameObject.SetActive(false);
-        //transform.position = _startPosition;
-        
+        foreach (var shapeEdge in shapeEdges)
+        {
+            shapeEdge.sprite.sortingOrder = data.defaultSortingOrder;
+        }
     }
-    
 }

@@ -19,4 +19,5 @@ MonoBehaviour:
     m_Bits: 64
   dragOffset: 1
   defaultSortingOrder: 10
-  sortingOrderAfterDrop: 3
+  ghostSortingOrder: 3
+  spawnScale: 0.75

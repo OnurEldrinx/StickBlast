@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultColor: {r: 1, g: 0.83591735, b: 0, a: 1}
   highlightColor: {r: 0.8113208, g: 0.61187375, b: 0, a: 1}
+  dotColor: {r: 0.2509804, g: 0.22745098, b: 0.5921569, a: 1}

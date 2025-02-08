@@ -8,7 +8,6 @@ public class Dot : MonoBehaviour
     [SerializeField] private Vector2Int coordinates;
     [SerializeField] public List<Dot> neighbors;
     
-    
     public List<Cell> Cells { get; private set; }
     public List<Edge> Edges { get; private set; }
 
@@ -36,9 +35,7 @@ public class Dot : MonoBehaviour
     {
         if (other.TryGetComponent<DotSensor>(out var dotSensor))
         {
-            //_spriteRenderer.color = new Color(1f, 1f, 1f, 0.5f);
             dotSensor.SetSnapPosition(transform.position);
-            //dotSensor.SnapTargetAvailable = true;
             dotSensor.SpecifySnapTarget(this);
         }
     }
@@ -48,7 +45,6 @@ public class Dot : MonoBehaviour
         if (other.TryGetComponent<DotSensor>(out var dotSensor))
         {
             Unhighlight();
-            //dotSensor.SnapTargetAvailable = false;
             dotSensor.SpecifySnapTarget(null);
         }
     }
@@ -71,17 +67,14 @@ public class Dot : MonoBehaviour
 
     public void Unhighlight()
     {
-        //_spriteRenderer.color = _defaultColor;
-        _highlightFadeTween = _spriteRenderer.DOColor(_defaultColor,0.25f);
-
+        _highlightFadeTween = _spriteRenderer.DOColor(_defaultColor, 0.25f);
     }
 
     public void FillAnimation(Color c)
     {
-        transform.DOShakeScale( 0.5f,0.5f,10,0,true,ShakeRandomnessMode.Harmonic).SetEase(Ease.OutBounce);
-        _spriteRenderer.DOColor(c,0.5f);
+        transform.DOShakeScale(0.5f, 0.5f, 10, 0, true, ShakeRandomnessMode.Harmonic).SetEase(Ease.OutBounce);
+        _spriteRenderer.DOColor(c, 0.5f);
         _defaultColor = c;
-
     }
 
     public void ResetState()
@@ -89,5 +82,52 @@ public class Dot : MonoBehaviour
         _spriteRenderer.color = _initialColor;
         _defaultColor = _initialColor;
     }
-    
+
+    public void RemoveEdge(Edge edge)
+    {
+        if (Edges.Contains(edge))
+        {
+            bool isNeeded = false;
+            foreach (var cell in Cells)
+            {
+                if (!cell.IsCompleted())
+                {
+                    isNeeded = true;
+                    break;
+                }
+            }
+            if (!isNeeded)
+            {
+                Edges.Remove(edge);
+                //Destroy(edge.gameObject);
+            }
+        }
+    }
+
+    public void CheckAndRemoveEdges()
+    {
+        List<Edge> edgesToRemove = new List<Edge>();
+        
+        foreach (var edge in Edges)
+        {
+            bool isNeeded = false;
+            foreach (var cell in Cells)
+            {
+                if (!cell.IsCompleted())
+                {
+                    isNeeded = true;
+                    break;
+                }
+            }
+            if (!isNeeded)
+            {
+                edgesToRemove.Add(edge);
+            }
+        }
+        
+        foreach (var edge in edgesToRemove)
+        {
+            RemoveEdge(edge);
+        }
+    }
 }

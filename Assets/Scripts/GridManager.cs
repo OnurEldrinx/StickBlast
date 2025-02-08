@@ -14,6 +14,11 @@ public class GridManager : Singleton<GridManager>
     
     private List<Cell> blastRow;
     private List<Cell> blastColumn;
+
+    public List<Edge> allEdges;
+    [SerializeField] public List<Edge> filledEdges;
+    
+    public ThemeData themeData;
     
     private void Awake()
     {
@@ -58,14 +63,28 @@ public class GridManager : Singleton<GridManager>
             {
                 var currentCell = cells[cellIndex++];
                 currentCell.id = cellIndex;
-                _cellMatrix[i, j] = currentCell;
+                _cellMatrix[i,j] = currentCell;
                 _cellMatrix[i,j].SetCoordinates(new Vector2Int(i,j));
             }
         }
         
+    }
+
+    private void Start()
+    {
+        allEdges = cells.SelectMany(cell => cell.edges).ToList();
+
+        /*foreach (var edge in allEdges)
+        {
+            foreach (var c in cells.Where(c => c.edges.Contains(edge)))
+            {
+                edge.cell = c;
+                break;
+            }
+        }*/
         
     }
-    
+
     private int CompareByNames(Dot d1, Dot d2)
     {
         return string.CompareOrdinal(d1.name, d2.name);
@@ -86,7 +105,7 @@ public class GridManager : Singleton<GridManager>
             .ToList();
     }
     
-    private List<Cell> NeighborsOf(Cell cell)
+    public List<Cell> NeighborsOf(Cell cell)
     {
         int x = cell.GetCoordinates().x;
         int y = cell.GetCoordinates().y;
@@ -169,7 +188,7 @@ public class GridManager : Singleton<GridManager>
         }
         
         blastRow = row;
-        print($"Row complete {queryCell.gameObject.name}");
+        //print($"Row complete {queryCell.gameObject.name}");
         return true;
         
     }
@@ -187,7 +206,7 @@ public class GridManager : Singleton<GridManager>
         }
         
         blastColumn = column;
-        print($"Column complete {queryCell.gameObject.name}");
+        //print($"Column complete {queryCell.gameObject.name}");
         return true;
         
     }
@@ -199,23 +218,26 @@ public class GridManager : Singleton<GridManager>
         {
             await Task.Delay(250);
         
-            HashSet<Cell> neighborsToReset = new HashSet<Cell>();
+            HashSet<Cell> neighbors = new HashSet<Cell>();
+            var blastedEdges = new List<Edge>();
+            
             
             if (IsRowComplete(queryCell))
             {
-                print($"Blasting Row-{queryCell.GetCoordinates().x}!");
+                //print($"Blasting Row-{queryCell.GetCoordinates().x}!");
 
                 foreach (var c in blastRow)
                 {
                     await Task.Delay(50);
-                    for (int i = 0; i < c.transform.childCount; i++)
+                    c.transform.GetChild(0).gameObject.SetActive(false);
+
+                    foreach (var e in c.edges)
                     {
-                        var child = c.transform.GetChild(i);
-                        child.gameObject.SetActive(false);
+                        e.OnBlast(c);
                     }
                     
-                    c.ResetState();
-                    neighborsToReset.UnionWith(NeighborsOf(c));
+                    c.UpdateState();
+                    neighbors.UnionWith(NeighborsOf(c));
                     
                 }
                 
@@ -223,28 +245,32 @@ public class GridManager : Singleton<GridManager>
 
             if (IsColumnComplete(queryCell))
             {
-                print($"Blasting Column-{queryCell.GetCoordinates().y}!");
+                //print($"Blasting Column-{queryCell.GetCoordinates().y}!");
             
                 foreach (var c in blastColumn)
                 {
                     await Task.Delay(50);
-                    for (int i = 0; i < c.transform.childCount; i++)
+                    
+                    c.transform.GetChild(0).gameObject.SetActive(false);
+                    
+                    foreach (var e in c.edges)
                     {
-                        var child = c.transform.GetChild(i);
-                        child.gameObject.SetActive(false);
+                        e.OnBlast(c);
                     }
                     
-                    c.ResetState();
-                    neighborsToReset.UnionWith(NeighborsOf(c));
-                    
+                    c.UpdateState();
+                    neighbors.UnionWith(NeighborsOf(c));
+
                 }
             }
 
-            foreach (var c in neighborsToReset)
+
+            foreach (var n in neighbors)
             {
-                c.ResetState();
+                n.UpdateState();
             }
-            
+
+
         }
         catch (Exception e)
         {

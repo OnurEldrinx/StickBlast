@@ -5,4 +5,5 @@ public class ThemeData : ScriptableObject
 {
     public Color defaultColor;
     public Color highlightColor;
+    public Color dotColor;
 }

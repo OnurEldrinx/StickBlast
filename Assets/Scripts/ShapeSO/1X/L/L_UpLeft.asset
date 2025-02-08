@@ -20,3 +20,4 @@ MonoBehaviour:
   dragOffset: 1
   defaultSortingOrder: 10
   ghostSortingOrder: 3
+  spawnScale: 0.75
