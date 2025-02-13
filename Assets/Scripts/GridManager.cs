@@ -208,15 +208,14 @@ public class GridManager : Singleton<GridManager>
             if (IsRowComplete(queryCell))
             {
                 //print($"Blasting Row-{queryCell.GetCoordinates().x}!");
+                var pos = new Vector3(0, queryCell.transform.position.y,0);
+                SpawnManager.Instance.SpawnBlastEffect(pos,false);
 
                 foreach (var c in blastRow)
                 {
-                    var pos = c.transform.position;
-                    pos.z = 20;
-                    SpawnManager.Instance.SpawnBlastEffect(pos);
+                    
                     await Task.Delay(50);
                     c.fill.SetActive(false);
-
                     foreach (var e in c.edges)
                     {
                         e.OnBlast(c);
@@ -235,14 +234,12 @@ public class GridManager : Singleton<GridManager>
             if (IsColumnComplete(queryCell))
             {
                 //print($"Blasting Column-{queryCell.GetCoordinates().y}!");
-            
+                var pos = new Vector3(queryCell.transform.position.x, 0,0);
+                SpawnManager.Instance.SpawnBlastEffect(pos,true);
+
                 foreach (var c in blastColumn)
                 {
-                    var pos = c.transform.position;
-                    pos.z = 20;
-                    SpawnManager.Instance.SpawnBlastEffect(pos);
                     await Task.Delay(50);
-                    
                     c.fill.SetActive(false);
                     
                     foreach (var e in c.edges)

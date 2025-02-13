@@ -41,6 +41,8 @@ public class SpawnManager : Singleton<SpawnManager>
 
         cell.GetComponent<Cell>().fill = f.gameObject;
 
+        SFXManager.Instance.PlaySfx(SfxType.Fill);
+        
     }
 
     /// <summary>
@@ -96,10 +98,17 @@ public class SpawnManager : Singleton<SpawnManager>
         }
     }
 
-    public void SpawnBlastEffect(Vector3 position)
+    public void SpawnBlastEffect(Vector3 position,bool isColumnBlast)
     {
         var b = Instantiate(blastEffect, position, Quaternion.identity);
+        if (isColumnBlast)
+        {
+            var currentRot = b.transform.rotation;
+            b.transform.rotation = Quaternion.Euler(currentRot.x, currentRot.y, 90);
+        }
         b.Play();
+        SFXManager.Instance.PlaySfx(SfxType.Blast);
+        
     }
     
 }

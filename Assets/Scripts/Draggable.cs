@@ -42,7 +42,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         }
 
         _collider = gameObject.AddComponent<BoxCollider2D>();
-        _collider.edgeRadius = 0.1f;
+        _collider.edgeRadius = 0.25f;
     }
 
     private void Start()
@@ -310,6 +310,9 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
 
         // Update the tray (or spawn new pieces).
         SpawnManager.Instance.UpdateTray();
+        
+        //SFX
+        SFXManager.Instance.PlaySfx(SfxType.Drop);
     }
 
     private void BackToStart()
