@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152961acb4f960d4caf9a1af9c1912e1, type: 3}
   m_Name: I_H2
   m_EditorClassIdentifier: 
+  id: 11
   theme: {fileID: 11400000, guid: 307ebfd559feb634aa087b4acff31ed6, type: 2}
   sprite: {fileID: 21300000, guid: f0cae43b176621547a5c34e78ba366dd, type: 3}
   gridLayer:
@@ -20,3 +21,4 @@ MonoBehaviour:
   dragOffset: 1
   defaultSortingOrder: 10
   ghostSortingOrder: 3
+  spawnScale: 0

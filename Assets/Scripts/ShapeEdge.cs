@@ -10,16 +10,12 @@ public class ShapeEdge
     
     public string currentEdgeTag;
     
-    // Constructor used for draggable pieces.
     public ShapeEdge(DotSensor d1, DotSensor d2)
     {
         this.d1 = d1;
         this.d2 = d2;
     }
-
-    /// <summary>
-    /// Resets the state of this edge and its associated dot sensors.
-    /// </summary>
+    
     public void ResetEdge()
     {
         if (sprite != null)

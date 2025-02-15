@@ -198,7 +198,6 @@ MonoBehaviour:
   edges: []
   ghostTransform: {fileID: 0}
   data: {fileID: 11400000, guid: c05eaeac81203d54793e939fb483d107, type: 2}
-  currentCells: []
   shapeEdges:
   - sprite: {fileID: 4558689804375707947}
     d1: {fileID: 8835602454519324476}
@@ -306,6 +305,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   snapTarget: {fileID: 0}
+  localCoordinate: {x: -1, y: 0}
 --- !u!61 &7581636291763051359
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -454,6 +454,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   snapTarget: {fileID: 0}
+  localCoordinate: {x: 0, y: 0}
 --- !u!61 &6275715506839066751
 BoxCollider2D:
   m_ObjectHideFlags: 0

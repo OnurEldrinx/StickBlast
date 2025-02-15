@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152961acb4f960d4caf9a1af9c1912e1, type: 3}
   m_Name: L_BottomRight
   m_EditorClassIdentifier: 
+  id: 4
   theme: {fileID: 11400000, guid: 307ebfd559feb634aa087b4acff31ed6, type: 2}
   sprite: {fileID: 21300000, guid: b702d2c15c7037d4cbefef98fe2f9531, type: 3}
   gridLayer:

@@ -7,7 +7,7 @@ using UnityEngine;
 public class GridManager : Singleton<GridManager>
 {
     [SerializeField] private Transform gridTransform;
-    [SerializeField] private List<Dot> dots;
+    [SerializeField] public List<Dot> dots;
     [SerializeField] private List<Cell> cells;
     private Dot[,] _dotMatrix;
     private Cell[,] _cellMatrix;
@@ -15,6 +15,7 @@ public class GridManager : Singleton<GridManager>
     public List<Cell> blastRow;
     public List<Cell> blastColumn;
 
+    public List<Dot> candidateDots;
     
     public ThemeData themeData;
     
@@ -67,11 +68,10 @@ public class GridManager : Singleton<GridManager>
         }
         
     }
-    
 
-    private int CompareByNames(Dot d1, Dot d2)
+    private void Start()
     {
-        return string.CompareOrdinal(d1.name, d2.name);
+        CandidateDots();
     }
 
     public Dot NearestDot(Vector2 position)
@@ -158,8 +158,8 @@ public class GridManager : Singleton<GridManager>
     {
         return cells.Find(e => Mathf.Approximately(e.transform.position.x, position.x) && Mathf.Approximately(e.transform.position.y, position.y));
     }
-    
-    public bool IsRowComplete(Cell queryCell)
+
+    private bool IsRowComplete(Cell queryCell)
     {
         var row = cells.FindAll(c=>c.GetCoordinates().x == queryCell.GetCoordinates().x);
 
@@ -177,7 +177,7 @@ public class GridManager : Singleton<GridManager>
         
     }
 
-    public bool IsColumnComplete(Cell queryCell)
+    private bool IsColumnComplete(Cell queryCell)
     {
         var column = cells.FindAll(c=>c.GetCoordinates().y == queryCell.GetCoordinates().y);
 
@@ -272,5 +272,14 @@ public class GridManager : Singleton<GridManager>
         return cells.FindAll(c=>c.edges.Any(e => e.tag == t));
         
     }
+
+    public List<Dot> CandidateDots()
+    {
+        candidateDots = dots.FindAll(d=>d.Edges.Count(e=>!e.filled) > 0);
+        return candidateDots;
+    }
+
     
+
+
 }
