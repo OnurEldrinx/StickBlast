@@ -9,7 +9,7 @@ public class DotSensor : MonoBehaviour
     private BoxCollider2D _collider;
     private SpriteRenderer _spriteRenderer;
     
-    public Vector2 localCoordinate;
+    public Vector2Int localCoordinate;
     public bool isAnchor;
     
     private void Awake()

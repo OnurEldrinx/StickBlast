@@ -314,5 +314,35 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             shapeEdge.sprite.sortingOrder = data.defaultSortingOrder;
         }
     }
+
+    public DotSensor[] GetDotSensors()
+    {
+        return dotSensors;
+    }
+
+
+    public bool CanPlaceOnGrid(Dot dot)
+    {
+        foreach (var sensor in dotSensors)
+        {
+            if (sensor.isAnchor)
+            {
+                sensor.snapTarget = dot;
+                continue;
+            }
+            
+            sensor.snapTarget = GridManager.Instance.GetDotWithOffset(dot, sensor.localCoordinate);
+        }
+
+        var result = IsCandidatePlaceAvailable();
+
+        foreach (var sensor in dotSensors)
+        {
+            sensor.snapTarget = null;
+        }
+        
+        return result;
+    }
+    
     
 }

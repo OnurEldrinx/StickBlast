@@ -84,9 +84,6 @@ public class Dot : MonoBehaviour
         _defaultColor = _initialColor;
     }
 
-    public Dot GetDotWithOffset(Vector2 offset)
-    {
-        return neighbors.Find(n => coordinates + offset == n.coordinates);
-    }
+    
     
 }

@@ -469,7 +469,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &35300512
 Rigidbody2D:
   serializedVersion: 5
@@ -648,7 +647,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &46562273
 Rigidbody2D:
   serializedVersion: 5
@@ -889,7 +887,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &68811702
 Rigidbody2D:
   serializedVersion: 5
@@ -1456,7 +1453,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &192879401
 Rigidbody2D:
   serializedVersion: 5
@@ -1635,7 +1631,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &236194928
 Rigidbody2D:
   serializedVersion: 5
@@ -1814,7 +1809,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &239371853
 Rigidbody2D:
   serializedVersion: 5
@@ -1993,7 +1987,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &244185101
 Rigidbody2D:
   serializedVersion: 5
@@ -2664,6 +2657,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   failScreen: {fileID: 1674790947}
+  failScreenDelay: 1
 --- !u!1 &386261637
 GameObject:
   m_ObjectHideFlags: 0
@@ -2769,7 +2763,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &386261641
 Rigidbody2D:
   serializedVersion: 5
@@ -3041,7 +3034,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &476966307
 Rigidbody2D:
   serializedVersion: 5
@@ -3456,7 +3448,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &564377498
 Rigidbody2D:
   serializedVersion: 5
@@ -3837,7 +3828,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &657356436
 Rigidbody2D:
   serializedVersion: 5
@@ -4129,7 +4119,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &704593816
 Rigidbody2D:
   serializedVersion: 5
@@ -4203,6 +4192,55 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.41007194, y: 0.41007194}
   m_EdgeRadius: 0.05
+--- !u!1 &750117194
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 750117196}
+  - component: {fileID: 750117195}
+  m_Layer: 0
+  m_Name: Global Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &750117195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 750117194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: a893a277bf98d1540a1da13523ed4848, type: 2}
+--- !u!4 &750117196
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 750117194}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.2765975, y: 0.33541137, z: 12.362125}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &805832382
 GameObject:
   m_ObjectHideFlags: 0
@@ -4308,7 +4346,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &805832386
 Rigidbody2D:
   serializedVersion: 5
@@ -4538,7 +4575,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &821752033
 Rigidbody2D:
   serializedVersion: 5
@@ -4717,7 +4753,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &855057054
 Rigidbody2D:
   serializedVersion: 5
@@ -4927,7 +4962,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &870593019
 Rigidbody2D:
   serializedVersion: 5
@@ -5157,7 +5191,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &895844734
 Rigidbody2D:
   serializedVersion: 5
@@ -5387,7 +5420,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &988616644
 Rigidbody2D:
   serializedVersion: 5
@@ -5566,7 +5598,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &999483310
 Rigidbody2D:
   serializedVersion: 5
@@ -5858,7 +5889,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1098605086
 Rigidbody2D:
   serializedVersion: 5
@@ -6068,7 +6098,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1140673430
 Rigidbody2D:
   serializedVersion: 5
@@ -6247,7 +6276,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1182958589
 Rigidbody2D:
   serializedVersion: 5
@@ -6661,7 +6689,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1414162238
 Rigidbody2D:
   serializedVersion: 5
@@ -7004,7 +7031,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1496180664
 Rigidbody2D:
   serializedVersion: 5
@@ -7234,7 +7260,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1519205925
 Rigidbody2D:
   serializedVersion: 5
@@ -7526,7 +7551,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1548079962
 Rigidbody2D:
   serializedVersion: 5
@@ -7807,7 +7831,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1630265661
 Rigidbody2D:
   serializedVersion: 5
@@ -7935,9 +7958,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99cff881ffe0d7248aa30051c6baa752, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  units: []
-  dots: []
-  targetUnits: []
   onFail:
     m_PersistentCalls:
       m_Calls:
@@ -8058,7 +8078,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1652610813
 Rigidbody2D:
   serializedVersion: 5
@@ -8459,7 +8478,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1736779688
 Rigidbody2D:
   serializedVersion: 5
@@ -8638,7 +8656,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1745121790
 Rigidbody2D:
   serializedVersion: 5
@@ -8761,6 +8778,7 @@ MonoBehaviour:
   cells: []
   blastRow: []
   blastColumn: []
+  candidateDots: []
   themeData: {fileID: 11400000, guid: 307ebfd559feb634aa087b4acff31ed6, type: 2}
 --- !u!1 &1877570971
 GameObject:
@@ -9216,7 +9234,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &1951678068
 Rigidbody2D:
   serializedVersion: 5
@@ -9477,7 +9494,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &2029064965
 Rigidbody2D:
   serializedVersion: 5
@@ -9707,7 +9723,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &2035459715
 Rigidbody2D:
   serializedVersion: 5
@@ -9886,7 +9901,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &2046331681
 Rigidbody2D:
   serializedVersion: 5
@@ -10155,7 +10169,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &2111333032
 Rigidbody2D:
   serializedVersion: 5
@@ -10334,7 +10347,6 @@ MonoBehaviour:
   id: 0
   coordinates: {x: 0, y: 0}
   neighbors: []
-  filled: 0
 --- !u!50 &2123124915
 Rigidbody2D:
   serializedVersion: 5
@@ -10475,3 +10487,4 @@ SceneRoots:
   - {fileID: 259216494}
   - {fileID: 1727543191}
   - {fileID: 1650845632}
+  - {fileID: 750117196}

@@ -74,6 +74,20 @@ public class GridManager : Singleton<GridManager>
         CandidateDots();
     }
 
+    public Edge GetEdgeWithOffsetFrom(Dot dot,Vector2Int offset)
+    {
+        int x = dot.GetCoordinates().x + offset.x;
+        int y = dot.GetCoordinates().y + offset.y;
+
+        if (x < 0 || y < 0 || x >_dotMatrix.GetLength(1) - 1 || y > _dotMatrix.GetLength(0) - 1)
+        {
+            return null;
+        }
+        
+        var offsetDot = _dotMatrix[x,y];
+        return GetEdge(dot, dot.id + "," + offsetDot.id);
+    }
+    
     public Dot NearestDot(Vector2 position)
     {
         return dots
@@ -151,7 +165,7 @@ public class GridManager : Singleton<GridManager>
 
     public Edge GetEdge(Dot dot,string t)
     {
-        return dot.Edges.FirstOrDefault(e => e.tag == t);
+        return dot.Edges.FirstOrDefault(e => e.tag == t || e.tag == t.Reverse().ToString());
     }
 
     public Cell GetCell(Vector2 position)
@@ -278,8 +292,11 @@ public class GridManager : Singleton<GridManager>
         candidateDots = dots.FindAll(d=>d.Edges.Count(e=>!e.filled) > 0);
         return candidateDots;
     }
-
     
+    public Dot GetDotWithOffset(Dot from,Vector2Int offset)
+    {
+        return dots.Find(d => from.GetCoordinates() + offset == d.GetCoordinates());
+    }
 
 
 }

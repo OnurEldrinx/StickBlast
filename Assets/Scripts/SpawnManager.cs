@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -71,28 +70,19 @@ public class SpawnManager : Singleton<SpawnManager>
     
     public void UpdateTray(Draggable d)
     {
-        try
+        if (piecesInTray.Contains(d))
         {
-            if (piecesInTray.Contains(d))
-            {
-                piecesInTray.Remove(d);
-            }
-            
-            draggableCount = Mathf.Max(0, draggableCount - 1);
-            if (draggableCount <= 0)
-            {
-                draggableCount = 0;
-                SpawnDraggables();
-            }
-            
-            FailCheckManager.Instance.CheckFail(piecesInTray);
-
-
+            piecesInTray.Remove(d);
         }
-        catch (Exception)
+            
+        draggableCount = Mathf.Max(0, draggableCount - 1);
+        if (draggableCount <= 0)
         {
-            // ignored
+            draggableCount = 0;
+            SpawnDraggables();
         }
+            
+        FailCheckManager.Instance.CheckFailCondition(piecesInTray);
     }
 
     public void SpawnBlastEffect(Vector3 position,bool isColumnBlast)

@@ -1,72 +1,53 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+using System.Threading.Tasks;
 using UnityEngine.Events;
 
 public class FailCheckManager : Singleton<FailCheckManager>
 {
-    [SerializeField] private List<FailCheckUnit> units;
-    [SerializeField] private Dot[] dots;
     public UnityEvent onFail;
     
-    private void Start()
+    public async void CheckFailCondition(List<Draggable> piecesInTray)
     {
-        units = FindObjectsByType<FailCheckUnit>(FindObjectsInactive.Exclude,FindObjectsSortMode.None).ToList();
-        dots = GridManager.Instance.dots.ToArray();
-    }
-
-    public void CheckFail(List<Draggable> piecesInTray)
-    {
-        StartCoroutine(IsFailed(piecesInTray));
-    }
-
-    private IEnumerator IsFailed(List<Draggable> piecesInTray)
-    {
-        bool failed = true;
-        
-        var pieces = new List<Draggable>(piecesInTray);
-        foreach (var piece in pieces)
+        try
         {
-            var targetUnit = units.Find(u=>u.id == piece.data.id);
-            foreach (var dot in GridManager.Instance.CandidateDots())
+            await Task.Delay(250);
+        
+            var pieces = new List<Draggable>(piecesInTray);
+        
+            bool failed = true;
+        
+            foreach (var d in pieces)
             {
-
-                yield return new WaitForSeconds(0.05f);
-                targetUnit.anchorSensor.position = dot.transform.position;
-                var sensors = new List<DotSensor>(targetUnit.dotSensors).Where(s=>s.localCoordinate != Vector2.zero);
-                foreach (var dotSensor in sensors)
+                foreach (var candidateDot in GridManager.Instance.CandidateDots())
                 {
-                    var next = dot.GetDotWithOffset(dotSensor.localCoordinate);
-                    if (!next)
+                    if (d.CanPlaceOnGrid(candidateDot))
                     {
+                        failed = false;
                         break;
                     }
-                    dotSensor.transform.position =next.transform.position;
                 }
 
-                if (targetUnit.IsCandidatePlaceAvailable())
+                if (!failed)
                 {
-                    failed = false;
                     break;
                 }
+            
             }
 
-            if (!failed)
+            if (failed)
             {
-                break;
+                print("FAILED!");
+                onFail.Invoke();
+            }
+            else
+            {
+                print("NO FAIL!");
             }
         }
-
-
-        if (failed)
+        catch (Exception e)
         {
-            print("FAILED!");
-            onFail.Invoke();
-        }
-        else
-        {
-            print("NO FAIL!");
+            print(e.Message);
         }
     }
     
