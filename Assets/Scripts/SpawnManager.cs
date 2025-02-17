@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Pool;
 using Random = UnityEngine.Random;
 
 public class SpawnManager : Singleton<SpawnManager>
@@ -12,6 +13,37 @@ public class SpawnManager : Singleton<SpawnManager>
     [SerializeField] public List<Draggable> piecesInTray;
         
     public int draggableCount;
+
+    private IObjectPool<ParticleSystem> _blastEffectPool;
+    private bool _collectionCheck = true;
+    
+    private void Awake()
+    {
+        _blastEffectPool = new ObjectPool<ParticleSystem>(OnCreateBlastEffect,OnGetBlastEffect,OnReleaseBlastEffect,OnDestroyBlastEffect,_collectionCheck,6,12);
+    }
+
+    private void OnDestroyBlastEffect(ParticleSystem obj)
+    {
+        Destroy(obj);
+    }
+
+    private void OnReleaseBlastEffect(ParticleSystem obj)
+    {
+        obj.transform.rotation = Quaternion.Euler(new Vector3(0, 180, 0));
+        obj.gameObject.SetActive(false);
+    }
+
+    private void OnGetBlastEffect(ParticleSystem obj)
+    {
+        obj.gameObject.SetActive(true);
+    }
+
+    private ParticleSystem OnCreateBlastEffect()
+    {
+        var b = Instantiate(blastEffect);
+        b.GetComponent<PoolObject>().Pool = _blastEffectPool;
+        return b;
+    }
 
     private void Start()
     { 
@@ -87,12 +119,10 @@ public class SpawnManager : Singleton<SpawnManager>
 
     public void SpawnBlastEffect(Vector3 position,bool isColumnBlast)
     {
-        var b = Instantiate(blastEffect, position, Quaternion.identity);
-        if (isColumnBlast)
-        {
-            var currentRot = b.transform.rotation;
-            b.transform.rotation = Quaternion.Euler(currentRot.x, currentRot.y, 90);
-        }
+        //var b = Instantiate(blastEffect, position, Quaternion.identity);
+        var b = _blastEffectPool.Get();
+        b.transform.position = position;
+        b.transform.rotation = Quaternion.Euler(0, 180, isColumnBlast ? 90 : 0);
         b.Play();
         SFXManager.Instance.PlaySfx(SfxType.Blast);
         

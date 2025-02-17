@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7859934483137239423}
   - component: {fileID: 6554929634157291388}
   - component: {fileID: 2215656616981201853}
+  - component: {fileID: -129254803843310248}
   m_Layer: 0
   m_Name: Blast
   m_TagString: Untagged
@@ -43,7 +44,7 @@ ParticleSystem:
   serializedVersion: 8
   lengthInSec: 1
   simulationSpeed: 1
-  stopAction: 1
+  stopAction: 3
   cullingMode: 2
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
@@ -169,8 +170,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 4
-      minScalar: 2
+      scalar: 6
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -611,8 +612,8 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 4
-      minScalar: 2
+      scalar: 8
+      minScalar: 4
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -664,7 +665,7 @@ ParticleSystem:
   ShapeModule:
     serializedVersion: 6
     enabled: 1
-    type: 15
+    type: 5
     angle: 15
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
@@ -980,7 +981,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 500
+        scalar: 250
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -4891,3 +4892,15 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &-129254803843310248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6672637060278557596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4f1a6a44386e9c48bf594d503e9eab3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
