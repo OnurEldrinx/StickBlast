@@ -18,6 +18,8 @@ public class Dot : MonoBehaviour
     
     private Tweener _highlightFadeTween;
     
+    private Tweener _fillColorTween;
+    
     
 
     private void Awake()
@@ -73,14 +75,22 @@ public class Dot : MonoBehaviour
     {
         if(_spriteRenderer is null){return;}
         transform.DOShakeScale(0.5f, 0.5f, 10, 0, true, ShakeRandomnessMode.Harmonic).SetEase(Ease.OutBounce);
-        _spriteRenderer?.DOColor(c, 0.5f);
+        _fillColorTween = _spriteRenderer?.DOColor(c, 0.5f);
         _defaultColor = c;
     }
 
     public void ResetState()
     {
+        DOTween.Kill(_fillColorTween);
         if(_spriteRenderer is null){return;}
         _spriteRenderer?.DOColor(_initialColor, 0.25f);
+        _defaultColor = _initialColor;
+    }
+
+    public void InstantReset()
+    {
+        if(_spriteRenderer is null){return;}
+        _spriteRenderer.color = _initialColor;
         _defaultColor = _initialColor;
     }
 

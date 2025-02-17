@@ -11,7 +11,7 @@ public class FailCheckManager : Singleton<FailCheckManager>
     {
         try
         {
-            await Task.Delay(250);
+            await Task.Delay(500);
         
             var pieces = new List<Draggable>(piecesInTray);
         
@@ -37,12 +37,7 @@ public class FailCheckManager : Singleton<FailCheckManager>
 
             if (failed)
             {
-                print("FAILED!");
                 onFail.Invoke();
-            }
-            else
-            {
-                print("NO FAIL!");
             }
         }
         catch (Exception e)

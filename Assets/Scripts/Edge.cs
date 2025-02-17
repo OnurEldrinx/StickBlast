@@ -11,7 +11,6 @@ public class Edge
     public string tag;
     public GameObject stickSprite;
 
-    public Cell cell;
     
     public Edge(Dot dot1, Dot dot2,Cell cell)
     {
@@ -36,9 +35,6 @@ public class Edge
         d2.Edges.Add(this);
 
         tag = $"{d1.id},{d2.id}";
-        
-        this.cell = cell;
-        
     }
     
     public void TryFill(Dot dotA, Dot dotB)

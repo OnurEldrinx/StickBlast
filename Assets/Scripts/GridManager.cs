@@ -1,7 +1,6 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class GridManager : Singleton<GridManager>
@@ -11,17 +10,18 @@ public class GridManager : Singleton<GridManager>
     [SerializeField] private List<Cell> cells;
     private Dot[,] _dotMatrix;
     private Cell[,] _cellMatrix;
-    
-    public List<Cell> blastRow;
-    public List<Cell> blastColumn;
+
+    private readonly List<List<Cell>> _blastRows = new();
+    private readonly List<List<Cell>> _blastColumns = new();
 
     public List<Dot> candidateDots;
     
     public ThemeData themeData;
+
+    public bool blastOnProcess;
     
     private void Awake()
     {
-        //dots = FindObjectsByType<Dot>(FindObjectsInactive.Exclude,FindObjectsSortMode.None).ToList();
         dots = gridTransform.GetComponentsInChildren<Dot>().ToList();
         cells = gridTransform.GetComponentsInChildren<Cell>().ToList();
         
@@ -72,6 +72,19 @@ public class GridManager : Singleton<GridManager>
     private void Start()
     {
         CandidateDots();
+
+        //Column 0
+        /*for(var i=0; i<_cellMatrix.GetLength(0);i++)
+        {
+            print(_cellMatrix[i,0].name);
+        }*/
+        
+        //Row 0
+        /*for(var i=0; i<_cellMatrix.GetLength(1);i++)
+        {
+            print(_cellMatrix[0,i].name);            
+        }*/
+        
     }
 
     public Edge GetEdgeWithOffsetFrom(Dot dot,Vector2Int offset)
@@ -173,9 +186,19 @@ public class GridManager : Singleton<GridManager>
         return cells.Find(e => Mathf.Approximately(e.transform.position.x, position.x) && Mathf.Approximately(e.transform.position.y, position.y));
     }
 
-    private bool IsRowComplete(Cell queryCell)
+    private List<Cell> GetRowOf(Cell queryCell)
     {
-        var row = cells.FindAll(c=>c.GetCoordinates().x == queryCell.GetCoordinates().x);
+        return cells.FindAll(c=>c.GetCoordinates().x == queryCell.GetCoordinates().x);
+    }
+
+    private List<Cell> GetColumnOf(Cell queryCell)
+    {
+        return cells.FindAll(c=>c.GetCoordinates().y == queryCell.GetCoordinates().y);
+    }
+
+    private bool IsRowComplete(List<Cell> row)
+    {
+        //var row = GetRowOf(queryCell);
 
         foreach (var c in row)
         {
@@ -185,15 +208,15 @@ public class GridManager : Singleton<GridManager>
             }
         }
         
-        blastRow = row;
+        //blastRows.Add(row);
         //print($"Row complete {queryCell.gameObject.name}");
         return true;
         
     }
 
-    private bool IsColumnComplete(Cell queryCell)
+    private bool IsColumnComplete(List<Cell> column)
     {
-        var column = cells.FindAll(c=>c.GetCoordinates().y == queryCell.GetCoordinates().y);
+        //var column = GetColumnOf(queryCell);
 
         foreach (var c in column)
         {
@@ -203,90 +226,111 @@ public class GridManager : Singleton<GridManager>
             }
         }
         
-        blastColumn = column;
+        //blastColumns.Add(column);
         //print($"Column complete {queryCell.gameObject.name}");
         return true;
         
     }
 
-    public async void IsTimeToBlast(Cell queryCell)
+    public void IsTimeToBlast()
     {
-        
-        try
+        StartCoroutine(nameof(CheckBlast));
+    }
+
+    public IEnumerator CheckBlast()
+    {
+        if (blastOnProcess)
         {
-            //await Task.Delay(250);
+            yield break;
+        }
+
+        yield return new WaitForSeconds(0.25f);
         
-            HashSet<Cell> neighbors = new HashSet<Cell>();
-            
-            
-            if (IsRowComplete(queryCell))
-            {
-                //print($"Blasting Row-{queryCell.GetCoordinates().x}!");
-                var pos = new Vector3(0, queryCell.transform.position.y,0);
-                SpawnManager.Instance.SpawnBlastEffect(pos,false);
+        blastOnProcess = true;
+        
+        HashSet<Cell> neighbors = new HashSet<Cell>();
 
-                foreach (var c in blastRow)
+        _blastColumns.Clear();
+        _blastRows.Clear();
+        
+        for(var i=0; i<_cellMatrix.GetLength(0);i++)
+        {
+            var row = GetRowOf(_cellMatrix[i,0]);
+            if (IsRowComplete(row))
+            {
+                _blastRows.Add(row);
+            }
+        }
+        
+        for(var i=0; i<_cellMatrix.GetLength(1);i++)
+        {
+            var column = GetColumnOf(_cellMatrix[0,i]);
+            if (IsColumnComplete(column))
+            {
+                _blastColumns.Add(column);
+            }
+        }
+
+        foreach (var row in _blastRows)
+        {
+            foreach (var c in row)
+            {
+                //await Task.Delay(50);
+                //yield return new WaitForSeconds(0.025f);
+                c.fill.SetActive(false);
+                
+                foreach (var e in c.edges)
                 {
-                    
-                    await Task.Delay(50);
-                    c.fill.SetActive(false);
-                    foreach (var e in c.edges)
-                    {
-                        e.OnBlast(c);
-                    }
-                    
-                    c.UpdateState();
-                    neighbors.UnionWith(NeighborsOf(c));
-                    
+                    e.OnBlast(c);
                 }
-
-                await Task.Delay(100);
-
+                
+                c.UpdateState();
+                neighbors.UnionWith(NeighborsOf(c));
             }
             
-            
-            if (IsColumnComplete(queryCell))
-            {
-                //print($"Blasting Column-{queryCell.GetCoordinates().y}!");
-                var pos = new Vector3(queryCell.transform.position.x, 0,0);
-                SpawnManager.Instance.SpawnBlastEffect(pos,true);
-
-                foreach (var c in blastColumn)
-                {
-                    await Task.Delay(50);
-                    c.fill.SetActive(false);
-                    
-                    foreach (var e in c.edges)
-                    {
-                        e.OnBlast(c);
-                    }
-                    
-                    c.UpdateState();
-                    neighbors.UnionWith(NeighborsOf(c));
-
-                }
-            }
-
-            //await Task.Delay(75);
-            foreach (var n in neighbors)
-            {
-                n.UpdateState();
-            }
-
+            //Blast Effect For Each Blast Row
+            var pos = new Vector3(0, row.First().transform.position.y,0);
+            SpawnManager.Instance.SpawnBlastEffect(pos,false);
 
         }
-        catch (Exception e)
+
+        foreach (var column in _blastColumns)
         {
-            print(e.Message);
+            foreach (var c in column)
+            {
+                //await Task.Delay(50);
+                //yield return new WaitForSeconds(0.025f);
+                c.fill.SetActive(false);
+                    
+                foreach (var e in c.edges)
+                {
+                    e.OnBlast(c);
+                }
+                
+                c.UpdateState();
+                neighbors.UnionWith(NeighborsOf(c));
+            }
+            
+            //Blast Effect For Each Blast Column
+            var pos = new Vector3(column.First().transform.position.x, 0,0);
+            SpawnManager.Instance.SpawnBlastEffect(pos,true);
         }
+        
+        foreach (var n in neighbors)
+        {
+            n.UpdateState();
+        }
+        
+        blastOnProcess = false;
+        
+        
     }
     
-    public List<Cell> FindCellByEdge(string t){
+    public List<Cell> FindCellsByEdge(string t){
         
-        return cells.FindAll(c=>c.edges.Any(e => e.tag == t));
-        
+        return cells.FindAll(c=>c.edges.Any(e => e.tag == t || e.tag == t.Reverse().ToString()));
     }
-
+    
     public List<Dot> CandidateDots()
     {
         candidateDots = dots.FindAll(d=>d.Edges.Count(e=>!e.filled) > 0);

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class Cell : MonoBehaviour
@@ -98,7 +99,8 @@ public class Cell : MonoBehaviour
         {
             completed = true;
             SpawnManager.Instance.FillTheCell(transform, fillColor);
-            GridManager.Instance.IsTimeToBlast(this);
+            //GridManager.Instance.IsTimeToBlast(this);
+            GridManager.Instance.IsTimeToBlast();
         }
         
         return true;
