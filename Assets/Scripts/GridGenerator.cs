@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridGenerator : MonoBehaviour
@@ -9,12 +10,19 @@ public class GridGenerator : MonoBehaviour
     
     [SerializeField] private Vector2Int gridSize;
 
-    private void Awake()
+    
+    
+    private void OnEnable()
     {
-        Generate();
+        UIManager.Instance.OnPlayButtonClicked += (x, y) =>
+        {
+            gridSize = new Vector2Int(x,y);
+            Generate();
+        };
     }
 
-    public void Generate()
+
+    private void Generate()
     {
 
         frameScaler.AdjustScale(gridSize.x, gridSize.y);
@@ -29,6 +37,10 @@ public class GridGenerator : MonoBehaviour
         
         GameObject dotsParent = new GameObject("Dots");
         GameObject linesParent = new GameObject("GridLines");
+        
+        var dots = new List<Dot>();
+        var cells = new List<Cell>();
+        
         for (int i=0; i<dotCountY; i++)
         {
             for (int j = 0; j < dotCountX; j++)
@@ -37,6 +49,7 @@ public class GridGenerator : MonoBehaviour
                 d.gameObject.name = $"Dot({index++})";
                 d.transform.position = new Vector2(startPosX + j, startPosY - i);
                 d.id = index;
+                dots.Add(d);
 
                 if (j < dotCountX-1)
                 {
@@ -74,6 +87,7 @@ public class GridGenerator : MonoBehaviour
                 c.gameObject.name = $"Cell({index++})";
                 c.transform.position = new Vector2(startPosX + j, startPosY - i);
                 c.id = index;
+                cells.Add(c);
             }
         }
         
@@ -81,6 +95,8 @@ public class GridGenerator : MonoBehaviour
         cellsParent.transform.parent = grid.transform;
         
         CameraSizeScaler.OnAdjust.Invoke(gridSize.x, gridSize.y);
+        
+        GridManager.Instance.Initialize(dots, cells, gridSize.x, gridSize.y);
         
     }
 }

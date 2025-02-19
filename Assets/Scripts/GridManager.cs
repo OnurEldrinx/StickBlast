@@ -18,24 +18,29 @@ public class GridManager : Singleton<GridManager>
     
     public int gridSize;
     
-    private void Awake()
+    public void Initialize(List<Dot> dotList,List<Cell> cellList, int gridWidth, int gridHeight)
     {
-        gridTransform = GameObject.Find("Grid").transform;
-        dots = gridTransform.GetComponentsInChildren<Dot>().ToList();
-        cells = gridTransform.GetComponentsInChildren<Cell>().ToList();
+        //gridTransform = GameObject.Find("Grid").transform;
+        //dots = gridTransform.GetComponentsInChildren<Dot>().ToList();
+        //cells = gridTransform.GetComponentsInChildren<Cell>().ToList();
+        
+        dots = dotList;
+        cells = cellList;
         
         // Generate grid matrix
-        int n = (int)Mathf.Sqrt(dots.Count);
-        gridSize = n;
-        _dotMatrix = new Dot[n, n];
+        //int n = (int)Mathf.Sqrt(dots.Count);
+        gridSize = (gridWidth + gridHeight) / 2;
+        int x=gridWidth+1;
+        int y=gridHeight+1;
+        _dotMatrix = new Dot[y, x];
         int dotIndex=0;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < y; i++)
         {
-            for (int j = 0; j < n; j++)
+            for (int j = 0; j < x; j++)
             {
                 var currentDot = dots[dotIndex++];
                 currentDot.id = dotIndex;
-                _dotMatrix[i, j] = currentDot;
+                _dotMatrix[i,j] = currentDot;
                 _dotMatrix[i,j].SetCoordinates(new Vector2Int(i,j));
             }
         }
@@ -53,12 +58,15 @@ public class GridManager : Singleton<GridManager>
         }
         
         //Generate Cell Matrix
-        int k = (int)Mathf.Sqrt(cells.Count);
-        _cellMatrix = new Cell[k, k];
+        //int k = (int)Mathf.Sqrt(cells.Count);
+        x -= 1;
+        y -= 1;
+        
+        _cellMatrix = new Cell[y, x];
         int cellIndex=0;
-        for (int i = 0; i < k; i++)
+        for (int i = 0; i < y; i++)
         {
-            for (int j = 0; j < k; j++)
+            for (int j = 0; j < x; j++)
             {
                 var currentCell = cells[cellIndex++];
                 currentCell.id = cellIndex;
@@ -67,11 +75,6 @@ public class GridManager : Singleton<GridManager>
             }
         }
         
-    }
-
-    private void Start()
-    {
-        CandidateDots();
     }
 
     private List<Dot> NearestFourDots(Vector2 position)

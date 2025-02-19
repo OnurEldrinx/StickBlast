@@ -88,11 +88,6 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     
     public void OnPointerDown(PointerEventData eventData)
     {
-
-        if (eventData.clickCount == 1)
-        {
-            print("Clicked");
-        }
         
         var pointerPosition = _mainCamera.ScreenToWorldPoint(eventData.position);
         pointerPosition.z = transform.position.z;

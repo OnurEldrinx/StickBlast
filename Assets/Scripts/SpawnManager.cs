@@ -28,6 +28,14 @@ public class SpawnManager : Singleton<SpawnManager>
         
     }
 
+    private void OnEnable()
+    {
+        UIManager.Instance.OnPlayButtonClicked += (_, _) =>
+        {
+            Invoke(nameof(SpawnDraggables),0.5f);
+        };
+    }
+
     private void OnDestroyBlastEffect(ParticleSystem obj)
     {
         Destroy(obj);
@@ -53,18 +61,18 @@ public class SpawnManager : Singleton<SpawnManager>
         return b;
     }
 
-    private async void Start()
+    /*private async void Start()
     {
         try
         {
-            await Task.Delay(100);
+            await Task.Delay(500);
             SpawnDraggables();
         }
         catch (Exception)
         {
             //ignored
         }
-    }
+    }*/
     
     public void FillTheCell(Transform cell, Color c)
     {
