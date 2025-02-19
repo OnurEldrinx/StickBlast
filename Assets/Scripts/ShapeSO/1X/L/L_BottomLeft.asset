@@ -22,3 +22,7 @@ MonoBehaviour:
   defaultSortingOrder: 10
   ghostSortingOrder: 3
   spawnScale: 0.75
+  offsets:
+  - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}

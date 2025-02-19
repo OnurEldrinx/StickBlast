@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
@@ -116,6 +117,11 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             return;
         }
 
+        foreach (var sensor in dotSensors)
+        {
+            sensor.SearchForSnapTarget();
+        }
+
         bool candidatePlaceAvailable = IsCandidatePlaceAvailable();
 
         if (candidatePlaceAvailable)
@@ -149,18 +155,29 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             snapTargets.Add(sensor.snapTarget);
         }
 
+        if (HasDuplicates(snapTargets))
+        {
+            return false;
+        }
+        
+
         for (int i = 0; i < snapTargets.Count - 1; i++)
         {
             Dot current = snapTargets[i];
             Dot next = snapTargets[i + 1];
 
-            var edge = GridManager.Instance.GetEdge(current, current.id + "," + next.id);
-            var edgeAlternative = GridManager.Instance.GetEdge(current, next.id + "," + current.id);
+            var edge = GridManager.Instance.GetEdge(current, new EdgeKey(current.id, next.id));
 
-            if ((edge != null && edge.filled) || (edgeAlternative != null && edgeAlternative.filled))
+            if ((edge != null && edge.filled))
                 return false;
         }
         return true;
+
+        bool HasDuplicates<T>(IEnumerable<T> list)
+        {
+            HashSet<T> seen = new HashSet<T>();
+            return list.Any(item => !seen.Add(item));
+        }
     }
     
     private void HighlightSensors()
@@ -192,6 +209,12 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
     {
         ghostTransform.gameObject.SetActive(false);
         ghostTransform.localPosition = Vector3.zero;
+
+        foreach (var sensor in dotSensors)
+        {
+            sensor.snapTarget?.Unhighlight();
+        }
+        
     }
     
     private void Drop()
@@ -206,7 +229,7 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
         List<float> yPositions = new List<float>();
         var snapTargets = new List<Dot>();
         var cellTargets = new HashSet<Cell>();
-        var edgeTargets = new HashSet<string>();
+        var edgeTargets = new HashSet<EdgeKey>();
 
         foreach (var sensor in dotSensors)
         {
@@ -227,7 +250,8 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
 
         for (int i = 0; i < snapTargets.Count - 1; i++)
         {
-            edgeTargets.Add($"{snapTargets[i].id},{snapTargets[i + 1].id}");
+            //edgeTargets.Add($"{snapTargets[i].id},{snapTargets[i + 1].id}");
+            edgeTargets.Add(new EdgeKey(snapTargets[i].id, snapTargets[i+1].id));
         }
 
         foreach (var cell in cellTargets)
@@ -341,6 +365,50 @@ public class Draggable : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoin
             sensor.snapTarget = null;
         }
         
+        return result;
+    }
+    
+    private bool CanPlaceOnGridOnSpawn(Dot dot)
+    {
+        try
+        {
+
+            var snapTargets = new Dot[data.offsets.Length];
+            int index = 0;
+            foreach (var offset in data.offsets)
+            {
+                var currentDot = GridManager.Instance.GetDotWithOffset(dot, offset);
+                snapTargets[index++] = currentDot;
+                if (currentDot is null)
+                {
+                    return false;
+                }
+            }
+            
+            for (int i = 0; i < snapTargets.Length - 1; i++)
+            {
+                Dot current = snapTargets[i];
+                Dot next = snapTargets[i + 1];
+
+                var edge = GridManager.Instance.GetEdge(current, new EdgeKey(current.id, next.id));
+                
+                if ((edge != null && edge.filled))
+                    return false;
+            }
+        
+            return true;
+        }
+        catch (Exception e)
+        {
+            print(e.StackTrace);
+            throw;
+        }
+        
+    }
+
+    public bool IsCandidatePlaceAvailableOnSpawn()
+    { 
+        var result = GridManager.Instance.CandidateDots().Any(CanPlaceOnGridOnSpawn);
         return result;
     }
     

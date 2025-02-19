@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class Cell : MonoBehaviour
@@ -56,13 +55,14 @@ public class Cell : MonoBehaviour
         edgesCount = edges.Count;
     }
     
-    public bool FillEdges(List<Dot> targetDots, HashSet<string> targetEdges, Color fillColor, List<ShapeEdge> sticks)
+    public bool FillEdges(List<Dot> targetDots, HashSet<EdgeKey> targetEdges, Color fillColor, List<ShapeEdge> sticks)
     {
         foreach (var shapeEdge in sticks)
         {
             if (shapeEdge.d1.snapTarget != null && shapeEdge.d2.snapTarget != null)
             {
-                shapeEdge.currentEdgeTag = shapeEdge.d1.snapTarget.id + "," + shapeEdge.d2.snapTarget.id;
+                shapeEdge.currentEdgeTag = new EdgeKey(shapeEdge.d1.snapTarget.id, shapeEdge.d2.snapTarget.id);
+                    //shapeEdge.d1.snapTarget.id + "," + shapeEdge.d2.snapTarget.id;
             }
         }
         
@@ -72,7 +72,7 @@ public class Cell : MonoBehaviour
         foreach (var edge in edges)
         {
             if (dotSet.Contains(edge.d1) && dotSet.Contains(edge.d2) &&
-               (targetEdges.Contains(edge.tag) || targetEdges.Contains(ReverseTag(edge.tag))))
+               (targetEdges.Contains(edge.edgeKey)))
             {
                 if (edge.filled)
                 {
@@ -87,7 +87,7 @@ public class Cell : MonoBehaviour
             edge.filled = true;
             edgesCount--;
 
-            var foundStick = sticks.Find(s => s.currentEdgeTag == edge.tag || s.currentEdgeTag == ReverseTag(edge.tag));
+            var foundStick = sticks.Find(s => s.currentEdgeTag.Equals(edge.edgeKey));
             if (foundStick == null)
             {
                 return false;
@@ -99,22 +99,10 @@ public class Cell : MonoBehaviour
         {
             completed = true;
             SpawnManager.Instance.FillTheCell(transform, fillColor);
-            //GridManager.Instance.IsTimeToBlast(this);
             GridManager.Instance.IsTimeToBlast();
         }
         
         return true;
-    }
-    
-    private string ReverseTag(string t)
-    {
-        var parts = t.Split(',');
-        if (parts.Length != 2)
-        {
-            Debug.LogError("Invalid edge tag: " + t);
-            return t;
-        }
-        return parts[1] + "," + parts[0];
     }
     
     public void SetCoordinates(Vector2Int c)

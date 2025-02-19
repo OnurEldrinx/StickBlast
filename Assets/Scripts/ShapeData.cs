@@ -11,4 +11,5 @@ public class ShapeData : ScriptableObject
     public int defaultSortingOrder = 10;
     public int ghostSortingOrder = 3;
     public float spawnScale;
+    public Vector2Int[] offsets;
 }

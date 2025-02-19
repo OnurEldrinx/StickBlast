@@ -20,6 +20,7 @@ public class Dot : MonoBehaviour
     
     private Tweener _fillColorTween;
     
+    public bool highlighted;
     
 
     private void Awake()
@@ -30,25 +31,7 @@ public class Dot : MonoBehaviour
         _defaultColor = _spriteRenderer.color;
         _initialColor = _spriteRenderer.color;
     }
-
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.TryGetComponent<DotSensor>(out var dotSensor))
-        {
-            dotSensor.SetSnapPosition(transform.position);
-            dotSensor.SpecifySnapTarget(this);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.TryGetComponent<DotSensor>(out var dotSensor))
-        {
-            Unhighlight();
-            dotSensor.SpecifySnapTarget(null);
-        }
-    }
-
+    
     public void SetCoordinates(Vector2Int c)
     {
         coordinates = c;
@@ -61,38 +44,39 @@ public class Dot : MonoBehaviour
 
     public void Highlight(Color c)
     {
+        if (highlighted) { return; }
+
         _highlightFadeTween.Kill();
         _spriteRenderer.color = c;
+        highlighted = true;
     }
 
-    private void Unhighlight()
+    public void Unhighlight()
     {
-        if(_spriteRenderer is null){return;}
+        if(_spriteRenderer is null || !highlighted){return;}
         _highlightFadeTween = _spriteRenderer?.DOColor(_defaultColor, 0.25f);
+        highlighted = false;
+
     }
 
     public void FillAnimation(Color c)
     {
         if(_spriteRenderer is null){return;}
         transform.DOShakeScale(0.5f, 0.5f, 10, 0, true, ShakeRandomnessMode.Harmonic).SetEase(Ease.OutBounce);
-        _fillColorTween = _spriteRenderer?.DOColor(c, 0.5f);
+        _fillColorTween = _spriteRenderer?.DOColor(c, 0.5f).SetDelay(0.1f);
         _defaultColor = c;
     }
 
     public void ResetState()
     {
-        DOTween.Kill(_fillColorTween);
+        //DOTween.Kill(_fillColorTween);
+        _fillColorTween.Kill();
         if(_spriteRenderer is null){return;}
         _spriteRenderer?.DOColor(_initialColor, 0.25f);
         _defaultColor = _initialColor;
+        highlighted = false;
     }
-
-    public void InstantReset()
-    {
-        if(_spriteRenderer is null){return;}
-        _spriteRenderer.color = _initialColor;
-        _defaultColor = _initialColor;
-    }
+    
 
     
     

@@ -11,6 +11,11 @@ public class DotSensor : MonoBehaviour
     
     public Vector2Int localCoordinate;
     public bool isAnchor;
+
+    public float snapThreshold = 0.55f;
+    
+    private Dot _lastHighlightedDot;
+    private Dot _nearestDot;
     
     private void Awake()
     {
@@ -23,12 +28,44 @@ public class DotSensor : MonoBehaviour
         
     }
     
+    public void SearchForSnapTarget()
+    {
+        Vector2 sensorPos = transform.position;
+        _nearestDot = null;
+        var minDistance = snapThreshold;
+        
+        foreach (Dot dot in GridManager.Instance.dots)
+        {
+            float distance = Vector2.Distance(sensorPos, dot.transform.position);
+            if (distance <= minDistance)
+            {
+                minDistance = distance;
+                _nearestDot = dot;
+            }
+            else
+            {
+                dot.Unhighlight();
+            }
+        }
+        
+        if (_nearestDot)
+        {
+            SetSnapPosition(_nearestDot.transform.position);
+            SpecifySnapTarget(_nearestDot);
+        }
+        else
+        {
+            SpecifySnapTarget(null);
+        }
+    }
+    
+
     public void Initialize(Color c)
     {
         _spriteRenderer.color = c;
     }
     
-    public void SetSnapPosition(Vector3 p)
+    private void SetSnapPosition(Vector3 p)
     {
         _snapPosition = p;
     }
@@ -38,11 +75,11 @@ public class DotSensor : MonoBehaviour
         return _snapPosition;
     }
     
-    public void SpecifySnapTarget(Dot target)
+    private void SpecifySnapTarget(Dot target)
     {
         snapTarget = target;
-        SnapTargetAvailable = target != null;
-        _snapPosition = target != null ? target.transform.position : Vector3.zero;
+        SnapTargetAvailable = target;
+        _snapPosition = target ? target.transform.position : Vector3.zero;
     }
     
     public void SetColliderState(bool state)

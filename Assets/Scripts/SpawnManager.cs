@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -17,9 +20,12 @@ public class SpawnManager : Singleton<SpawnManager>
     private IObjectPool<ParticleSystem> _blastEffectPool;
     private bool _collectionCheck = true;
     
+    private readonly HashSet<int> _spawnTargets = new();
+    
     private void Awake()
     {
         _blastEffectPool = new ObjectPool<ParticleSystem>(OnCreateBlastEffect,OnGetBlastEffect,OnReleaseBlastEffect,OnDestroyBlastEffect,_collectionCheck,6,12);
+        
     }
 
     private void OnDestroyBlastEffect(ParticleSystem obj)
@@ -42,12 +48,22 @@ public class SpawnManager : Singleton<SpawnManager>
     {
         var b = Instantiate(blastEffect);
         b.GetComponent<PoolObject>().Pool = _blastEffectPool;
+        var shape = b.shape;
+        shape.scale = new Vector3(GridManager.Instance.gridSize, 0.35f, 0.35f);
         return b;
     }
 
-    private void Start()
-    { 
-        SpawnDraggables();
+    private async void Start()
+    {
+        try
+        {
+            await Task.Delay(100);
+            SpawnDraggables();
+        }
+        catch (Exception)
+        {
+            //ignored
+        }
     }
     
     public void FillTheCell(Transform cell, Color c)
@@ -79,25 +95,28 @@ public class SpawnManager : Singleton<SpawnManager>
         {
             return;
         }
-
+        
+        _spawnTargets.Clear();
         draggableCount = 0;
+        
         foreach (var spawnPoint in spawnPoints)
         {
-            Draggable prefab = draggablePrefabs[Random.Range(0, draggablePrefabs.Count)];
-            if (prefab == null)
-            {
-                continue;
-            }
+            HashSet<Draggable> validCandidates = new HashSet<Draggable>(draggablePrefabs
+                .Where(d => d.IsCandidatePlaceAvailableOnSpawn() && !_spawnTargets.Contains(d.data.id)).ToList());
             
-            Draggable d = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
+            var spawnTarget = validCandidates.Count == 0 ? draggablePrefabs[Random.Range(0, draggablePrefabs.Count)] : validCandidates.ElementAt(Random.Range(0, validCandidates.Count));
+            
+            _spawnTargets.Add(spawnTarget.data.id);
+            
+            Draggable d = Instantiate(spawnTarget, spawnPoint.position, Quaternion.identity);
             d.transform.localScale = Vector3.zero;
-            
             d.transform.DOScale(d.data.spawnScale * Vector3.one, 0.5f).SetEase(Ease.OutBack);
             draggableCount++;
-            
             piecesInTray.Add(d);
             
         }
+        
+        
     }
     
     public void UpdateTray(Draggable d)

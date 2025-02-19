@@ -8,7 +8,8 @@ public class Edge
     public Dot d1;
     public Dot d2;
     public bool filled;
-    public string tag;
+    //public string tag;
+    public EdgeKey edgeKey;
     public GameObject stickSprite;
 
     
@@ -34,7 +35,8 @@ public class Edge
         d1.Edges.Add(this);
         d2.Edges.Add(this);
 
-        tag = $"{d1.id},{d2.id}";
+        //tag = $"{d1.id},{d2.id}";
+        edgeKey = new EdgeKey(d1.id, d2.id);
     }
     
     public void TryFill(Dot dotA, Dot dotB)
@@ -56,12 +58,12 @@ public class Edge
 
         foreach (var neighbor in neighborsCell)
         {
-            if (neighbor.edges.Exists(x=>x.tag == tag) && neighbor.completed && !neighbor.edges.Contains(this))
+            if (neighbor.edges.Exists(x=>x.edgeKey.Equals(edgeKey)) && neighbor.completed && !neighbor.edges.Contains(this))
             {
                 return;
             }
 
-            var e = neighbor.edges.FirstOrDefault(e => e.tag == tag);
+            var e = neighbor.edges.FirstOrDefault(e => e.edgeKey.Equals(edgeKey));
             if (e != null)
             {
                 e.filled = false;

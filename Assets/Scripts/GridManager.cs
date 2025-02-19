@@ -13,20 +13,20 @@ public class GridManager : Singleton<GridManager>
 
     private readonly List<List<Cell>> _blastRows = new();
     private readonly List<List<Cell>> _blastColumns = new();
-
-    public List<Dot> candidateDots;
     
-    public ThemeData themeData;
-
     public bool blastOnProcess;
+    
+    public int gridSize;
     
     private void Awake()
     {
+        gridTransform = GameObject.Find("Grid").transform;
         dots = gridTransform.GetComponentsInChildren<Dot>().ToList();
         cells = gridTransform.GetComponentsInChildren<Cell>().ToList();
         
         // Generate grid matrix
         int n = (int)Mathf.Sqrt(dots.Count);
+        gridSize = n;
         _dotMatrix = new Dot[n, n];
         int dotIndex=0;
         for (int i = 0; i < n; i++)
@@ -72,40 +72,6 @@ public class GridManager : Singleton<GridManager>
     private void Start()
     {
         CandidateDots();
-
-        //Column 0
-        /*for(var i=0; i<_cellMatrix.GetLength(0);i++)
-        {
-            print(_cellMatrix[i,0].name);
-        }*/
-        
-        //Row 0
-        /*for(var i=0; i<_cellMatrix.GetLength(1);i++)
-        {
-            print(_cellMatrix[0,i].name);            
-        }*/
-        
-    }
-
-    public Edge GetEdgeWithOffsetFrom(Dot dot,Vector2Int offset)
-    {
-        int x = dot.GetCoordinates().x + offset.x;
-        int y = dot.GetCoordinates().y + offset.y;
-
-        if (x < 0 || y < 0 || x >_dotMatrix.GetLength(1) - 1 || y > _dotMatrix.GetLength(0) - 1)
-        {
-            return null;
-        }
-        
-        var offsetDot = _dotMatrix[x,y];
-        return GetEdge(dot, dot.id + "," + offsetDot.id);
-    }
-    
-    public Dot NearestDot(Vector2 position)
-    {
-        return dots
-            .OrderBy(d => Vector2.Distance(d.transform.position, position))
-            .FirstOrDefault();
     }
 
     private List<Dot> NearestFourDots(Vector2 position)
@@ -176,9 +142,9 @@ public class GridManager : Singleton<GridManager>
         return result;
     }
 
-    public Edge GetEdge(Dot dot,string t)
+    public Edge GetEdge(Dot dot,EdgeKey t)
     {
-        return dot.Edges.FirstOrDefault(e => e.tag == t || e.tag == t.Reverse().ToString());
+        return dot.Edges.FirstOrDefault(e => e.edgeKey.Equals(t));
     }
 
     public Cell GetCell(Vector2 position)
@@ -326,21 +292,15 @@ public class GridManager : Singleton<GridManager>
         
     }
     
-    public List<Cell> FindCellsByEdge(string t){
-        
-        return cells.FindAll(c=>c.edges.Any(e => e.tag == t || e.tag == t.Reverse().ToString()));
-    }
-    
     public List<Dot> CandidateDots()
     {
-        candidateDots = dots.FindAll(d=>d.Edges.Count(e=>!e.filled) > 0);
-        return candidateDots;
+        return dots.FindAll(d=>d.Edges.Count(e=>!e.filled) > 0);
     }
     
     public Dot GetDotWithOffset(Dot from,Vector2Int offset)
     {
         return dots.Find(d => from.GetCoordinates() + offset == d.GetCoordinates());
     }
-
+    
 
 }
